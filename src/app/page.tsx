@@ -6,7 +6,7 @@ export default function Home() {
         <h2 className="home-subtitle">Bientôt disponible</h2>
         <p className="home-description">
           Nous construisons un outil qui vous aide à créer les prompts les plus puissants, précis et efficaces,
-          de la manière la plus simple possible. Restez à l'écoute !
+          de la manière la plus simple possible. Restez à l&apos;écoute !
         </p>
       </div>
     </main>

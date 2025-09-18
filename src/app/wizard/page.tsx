@@ -48,8 +48,12 @@ export default function WizardPage() {
         setMarkdown(data.markdown || "");
         setStructured(data.structured || null);
       }
-    } catch (err: any) {
-      setError(err?.message || "Network error.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("An unknown network error occurred.");
+      }
     } finally {
       setLoading(false);
     }

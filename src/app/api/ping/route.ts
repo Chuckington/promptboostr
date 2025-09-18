@@ -19,14 +19,16 @@ export async function GET() {
 
     const text = r.choices[0]?.message?.content ?? "no response";
     return NextResponse.json({ ok: true, model: "gpt-4o-mini", text });
-  } catch (e: any) {
+  } catch (e: unknown) {
     // Gestion propre des erreurs de quota
-    const code = e?.code || "unknown";
-    const status = e?.status || 500;
-    const message =
-      code === "insufficient_quota"
-        ? "OpenAI quota exceeded: add billing or enable MOCK_AI to develop without calling the API."
-        : e?.message || "Unexpected error";
+    const error = e as { code?: string; status?: number; message?: string };
+    const code = error?.code || "unknown";
+    const status = error?.status || 500;
+    let message = error?.message || "Unexpected error";
+
+    if (code === "insufficient_quota") {
+      message = "OpenAI quota exceeded: add billing or enable MOCK_AI to develop without calling the API.";
+    }
 
     return NextResponse.json({ ok: false, code, message }, { status: status === 429 ? 429 : 500 });
   }

@@ -23,14 +23,17 @@ function sanitize(s: unknown): string {
   return s.trim().slice(0, 5000);
 }
 
-function validate(body: any): { ok: boolean; data?: GenerateInput; error?: string } {
+function validate(body: unknown): { ok: boolean; data?: GenerateInput; error?: string } {
   if (!body || typeof body !== "object") return { ok: false, error: "Body must be JSON." };
 
-  const data: any = {};
+  const data: Partial<GenerateInput> = {};
   // Sanitize all potential fields present in the body
   for (const f of ALL_FIELDS) {
-    if (body[f] !== undefined && body[f] !== null) {
-      data[f] = sanitize(body[f]);
+    if (Object.prototype.hasOwnProperty.call(body, f)) {
+      const value = (body as Record<string, unknown>)[f];
+      if (value !== undefined && value !== null) {
+        data[f] = sanitize(value);
+      }
     }
   }
 
@@ -94,7 +97,7 @@ export async function POST(req: NextRequest) {
     const raw = completion.choices?.[0]?.message?.content ?? "";
     if (!raw) return new Response(JSON.stringify({ ok: false, error: "No content returned by model." }), { status: 500 });
 
-    let parsed: any;
+    let parsed: unknown;
     try {
       parsed = JSON.parse(raw);
     } catch {
@@ -102,8 +105,9 @@ export async function POST(req: NextRequest) {
       return new Response(JSON.stringify({ ok: false, error: "Invalid JSON from model.", raw_response: raw }), { status: 502 });
     }
 
+    const parsedResponse = parsed as { markdown?: unknown; structured?: unknown };
     // Ensure the response contains the expected keys
-    if (!parsed.markdown || !parsed.structured) {
+    if (typeof parsedResponse.markdown !== 'string' || typeof parsedResponse.structured !== 'object' || !parsedResponse.structured) {
       console.error("Malformed JSON from model (missing keys):", parsed);
       return new Response(JSON.stringify({ ok: false, error: "Malformed JSON from model (missing 'markdown' or 'structured' key).", raw_response: parsed }), { status: 502 });
     }
@@ -112,15 +116,22 @@ export async function POST(req: NextRequest) {
       JSON.stringify({
         ok: true,
         model: completion.model,
-        markdown: parsed.markdown,
-        structured: parsed.structured
+        markdown: parsedResponse.markdown,
+        structured: parsedResponse.structured
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
-    const msg = typeof err?.message === "string" ? err.message : "Unexpected server error.";
-    const status = Number(err?.status) || 500;
+    let msg = "Unexpected server error.";
+    let status = 500;
+    if (err instanceof Error) {
+      msg = err.message;
+      // A bit of a hack to get status from OpenAI's error shape
+      if ('status' in err && typeof (err as { status?: unknown }).status === 'number') {
+        status = (err as { status: number }).status;
+      }
+    }
     return new Response(JSON.stringify({ ok: false, error: msg }), { status });
   }
 }
