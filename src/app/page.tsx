@@ -1,14 +1,11 @@
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-6">
-      <h1 className="text-4xl font-bold text-gray-800 mb-4">
-        PromptBoostr
-      </h1>
-      <h2 className="text-2xl text-gray-600 mb-8">Coming Soon</h2>
-      <p className="max-w-xl text-center text-gray-500 text-lg">
-        We’re building a tool that helps you create the most powerful, precise, 
-        and effective prompts — in the simplest way possible. 
-        Stay tuned, PromptBoostr is on its way!
+    <main style={{minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center"}}>
+      <h1 style={{fontSize:"2rem",fontWeight:700,marginBottom:8}}>🚀 PromptBoostr</h1>
+      <h2 style={{fontSize:"1.25rem",opacity:.7,marginBottom:24}}>Coming Soon</h2>
+      <p style={{maxWidth:640,textAlign:"center",opacity:.8}}>
+        We’re building a tool that helps you create the most powerful, precise, and effective prompts —
+        in the simplest way possible. Stay tuned!
       </p>
     </main>
   );
