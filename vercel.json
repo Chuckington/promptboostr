@@ -1,0 +1,11 @@
+{
+    "redirects": [
+      {
+        "source": "/:path*",
+        "has": [{ "type": "host", "value": "www.promptboostr.com" }],
+        "destination": "https://promptboostr.com/:path*",
+        "permanent": true
+      }
+    ]
+  }
+  
