@@ -1,0 +1,80 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;700&display=swap');
+
+/* === Global & Body Styles === */
+body {
+    background-color: #080814; /* Très sombre, presque noir */
+    color: #e0e0e0;
+    font-family: 'Fredoka', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-image:
+        radial-gradient(circle at 15% 20%, rgba(60, 80, 220, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 85% 80%, rgba(220, 60, 120, 0.1) 0%, transparent 40%);
+    min-height: 100vh;
+}
+
+/* === Home Page Specific Styles === */
+.home-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 1rem;
+}
+
+.home-content {
+    max-width: 700px;
+}
+
+.home-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 0 8px rgba(200, 200, 255, 0.4);
+    opacity: 0;
+    animation: fadeInText 1.5s ease-out 0.2s forwards;
+}
+
+.home-subtitle {
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #a0a0c0;
+    margin-bottom: 1.5rem;
+    opacity: 0;
+    animation: fadeInText 1.5s ease-out 0.5s forwards;
+}
+
+.home-description {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #c0c0e0;
+    opacity: 0;
+    animation: fadeInText 1.5s ease-out 0.8s forwards;
+}
+
+@media (min-width: 768px) {
+    .home-title {
+        font-size: 3.5rem;
+    }
+    .home-subtitle {
+        font-size: 1.5rem;
+    }
+    .home-description {
+        font-size: 1.2rem;
+    }
+}
+
+/* Animations */
+@keyframes fadeInText {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
