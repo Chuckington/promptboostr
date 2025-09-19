@@ -1,21 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useReducer } from "react";
 
 type Structured = {
   final_prompt: string;
   [key: string]: unknown;
 };
 
+const initialFormState = {
+  role: "",
+  goal: "",
+  context: "",
+  format: "",
+  constraints: "",
+  explicitRole: "",
+  audience: "",
+  validationCriteria: "",
+};
+
+type FormState = typeof initialFormState;
+type FormAction = { type: 'SET_FIELD'; field: keyof FormState; payload: string };
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.payload };
+    default:
+      return state;
+  }
+}
+
 export default function WizardPage() { // Renamed component
-  const [role, setRole] = useState("");
-  const [goal, setGoal] = useState("");
-  const [context, setContext] = useState("");
-  const [format, setFormat] = useState("");
-  const [constraints, setConstraints] = useState("");
-  const [explicitRole, setExplicitRole] = useState("");
-  const [audience, setAudience] = useState("");
-  const [validationCriteria, setValidationCriteria] = useState("");
+  const [formState, dispatch] = useReducer(formReducer, initialFormState);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,11 +46,7 @@ export default function WizardPage() { // Renamed component
     setMarkdown("");
     setStructured(null);
 
-    const body: Record<string, string> = { role, goal, context, format, constraints };
-    if (explicitRole) body.explicitRole = explicitRole;
-    if (audience) body.audience = audience;
-    if (validationCriteria) body.validationCriteria = validationCriteria;
-
+    const body = Object.fromEntries(Object.entries(formState).filter(([, value]) => value));
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
@@ -81,8 +93,8 @@ export default function WizardPage() { // Renamed component
             <input
               className="wizard-input"
               placeholder="e.g., UX Expert, Tech Writer, Marketing Analyst..."
-              value={role}
-              onChange={(e) => setRole(e.target.value)}
+              value={formState.role}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'role', payload: e.target.value })}
             />
           </div>
 
@@ -91,8 +103,8 @@ export default function WizardPage() { // Renamed component
             <input
               className="wizard-input"
               placeholder="e.g., Write an implementation plan, Generate an email..."
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
+              value={formState.goal}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'goal', payload: e.target.value })}
             />
           </div>
 
@@ -102,8 +114,8 @@ export default function WizardPage() { // Renamed component
               className="wizard-textarea"
               rows={4}
               placeholder="Key info: audience, business constraints, available data..."
-              value={context}
-              onChange={(e) => setContext(e.target.value)}
+              value={formState.context}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'context', payload: e.target.value })}
             />
           </div>
 
@@ -112,8 +124,8 @@ export default function WizardPage() { // Renamed component
             <input
               className="wizard-input"
               placeholder="e.g., 5-step plan, Email, JSON, Markdown table..."
-              value={format}
-              onChange={(e) => setFormat(e.target.value)}
+              value={formState.format}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'format', payload: e.target.value })}
             />
           </div>
 
@@ -123,8 +135,8 @@ export default function WizardPage() { // Renamed component
               className="wizard-textarea"
               rows={3}
               placeholder="e.g., Professional tone, max 500 words, no jargon..."
-              value={constraints}
-              onChange={(e) => setConstraints(e.target.value)}
+              value={formState.constraints}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'constraints', payload: e.target.value })}
             />
           </div>
 
@@ -137,8 +149,8 @@ export default function WizardPage() { // Renamed component
             <input
               className="wizard-input"
               placeholder="e.g., A senior copywriter specialized in B2B SaaS"
-              value={explicitRole}
-              onChange={(e) => setExplicitRole(e.target.value)}
+              value={formState.explicitRole}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'explicitRole', payload: e.target.value })}
             />
           </div>
 
@@ -147,8 +159,8 @@ export default function WizardPage() { // Renamed component
             <input
               className="wizard-input"
               placeholder="e.g., Marketing directors of startups with 10-50 employees"
-              value={audience}
-              onChange={(e) => setAudience(e.target.value)}
+              value={formState.audience}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'audience', payload: e.target.value })}
             />
           </div>
 
@@ -158,8 +170,8 @@ export default function WizardPage() { // Renamed component
               className="wizard-textarea"
               rows={2}
               placeholder="e.g., The output must be actionable, under 300 words, and include a CTA."
-              value={validationCriteria}
-              onChange={(e) => setValidationCriteria(e.target.value)}
+              value={formState.validationCriteria}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'validationCriteria', payload: e.target.value })}
             />
           </div>
 
