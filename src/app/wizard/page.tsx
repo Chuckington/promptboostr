@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useReducer } from "react";
+import { useState, useReducer, useEffect } from "react";
 
 type Structured = {
   final_prompt: string;
@@ -31,6 +31,12 @@ function formReducer(state: FormState, action: FormAction): FormState {
 }
 
 export default function WizardPage() { // Renamed component
+  // --- Authentication State ---
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState("");
+
+  // --- Form State ---
   const [formState, dispatch] = useReducer(formReducer, initialFormState);
 
   const [loading, setLoading] = useState(false);
@@ -38,6 +44,27 @@ export default function WizardPage() { // Renamed component
 
   const [markdown, setMarkdown] = useState<string>("");
   const [structured, setStructured] = useState<Structured | null>(null);
+
+  // On page load, check if the user is already authenticated in this session
+  useEffect(() => {
+    if (sessionStorage.getItem("is_authenticated") === "true") {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  function handlePasswordSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    // The password MUST be stored in an environment variable for security
+    if (passwordInput === process.env.NEXT_PUBLIC_WIZARD_PASSWORD) {
+      setIsAuthenticated(true);
+      // Store the authentication status in session storage
+      sessionStorage.setItem("is_authenticated", "true");
+      setAuthError("");
+    } else {
+      setAuthError("Incorrect password.");
+      setPasswordInput("");
+    }
+  }
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -76,6 +103,36 @@ export default function WizardPage() { // Renamed component
     navigator.clipboard.writeText(text).catch(() => {});
   }
 
+  // If not authenticated, show a password form
+  if (!isAuthenticated) {
+    return (
+      <main className="wizard-container" style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1>Access Wizard</h1>
+          <p>Please enter the password to continue.</p>
+          <form
+            onSubmit={handlePasswordSubmit}
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem', minWidth: '300px' }}
+          >
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              className="wizard-input"
+              placeholder="Password"
+              autoFocus
+            />
+            <button type="submit" className="wizard-button">
+              Enter
+            </button>
+            {authError && <p className="wizard-error" style={{ marginTop: '0.5rem' }}>{authError}</p>}
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  // If authenticated, show the wizard
   return (
     <main className="wizard-container">
       {/* Left Panel: Wizard Form */}
