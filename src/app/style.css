@@ -79,6 +79,27 @@ body {
   }
 }
 
+/* === Login Page Styles === */
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.login-panel {
+    width: 100%;
+    max-width: 480px;
+    background: rgba(16, 16, 32, 0.6);
+    border: 1px solid #000;
+    border-radius: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.37);
+    padding: 2.5rem;
+}
+
+
 /* === Wizard Page Styles === */
 .wizard-container {
     display: flex;
@@ -103,6 +124,13 @@ body {
     gap: 1.5rem;
 }
 
+.wizard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
 /* Left Panel: Form */
 .wizard-panel h1 {
     font-size: 2rem;
@@ -114,7 +142,7 @@ body {
 
 .wizard-panel p {
     color: #a0a0c0;
-    margin-top: -1rem;
+    margin-top: -0.75rem;
     margin-bottom: 1rem;
 }
 
@@ -191,6 +219,22 @@ body {
     background: #404060;
     cursor: not-allowed;
     opacity: 0.7;
+}
+
+.signout-button {
+    background: rgba(255, 85, 85, 0.2);
+    color: #ff8a8a;
+    border: 1px solid #ff5555;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.signout-button:hover {
+    background: rgba(255, 85, 85, 0.4);
+    color: #ffffff;
 }
 
 .wizard-optional-divider {

@@ -1,6 +1,8 @@
 // src/app/wizard/page.tsx
 "use client";
 
+import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 import { useState } from "react";
 
 type Structured = {
@@ -26,6 +28,9 @@ export default function WizardPage() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
+  const supabase = createClient();
 
   const [markdown, setMarkdown] = useState<string>("");
   const [structured, setStructured] = useState<Structured | null>(null);
@@ -71,12 +76,25 @@ export default function WizardPage() {
     navigator.clipboard.writeText(text).catch(() => {});
   }
 
+  async function handleSignOut() {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  }
+
   return (
     <main className="wizard-container">
       {/* Left Panel: Wizard Form */}
       <div className="wizard-panel">
-        <h1>PromptBoostr Wizard</h1>
-        <p>Fill the 5 fields to generate your perfect prompt.</p>
+        <div className="wizard-header">
+          <div>
+            <h1>PromptBoostr Wizard</h1>
+            <p>Fill the fields to generate your perfect prompt.</p>
+          </div>
+          <button onClick={handleSignOut} className="signout-button">
+            Sign Out
+          </button>
+        </div>
 
         <form onSubmit={onSubmit} className="wizard-form">
           <div className="wizard-form-group">
