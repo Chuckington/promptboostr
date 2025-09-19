@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server'
 
 export function createClient(request: NextRequest) {
   // Create an unmodified response
-  let response = NextResponse.next({
+  const response = NextResponse.next({
     request: {
       headers: request.headers,
     },
