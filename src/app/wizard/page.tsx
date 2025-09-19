@@ -20,6 +20,9 @@ export default function WizardPage() {
   const [context, setContext] = useState("");
   const [format, setFormat] = useState("");
   const [constraints, setConstraints] = useState("");
+  const [explicitRole, setExplicitRole] = useState("");
+  const [audience, setAudience] = useState("");
+  const [validationCriteria, setValidationCriteria] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -34,11 +37,16 @@ export default function WizardPage() {
     setMarkdown("");
     setStructured(null);
 
+    const body: Record<string, string> = { role, goal, context, format, constraints };
+    if (explicitRole) body.explicitRole = explicitRole;
+    if (audience) body.audience = audience;
+    if (validationCriteria) body.validationCriteria = validationCriteria;
+
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, goal, context, format, constraints }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -120,6 +128,41 @@ export default function WizardPage() {
               placeholder="e.g., Professional tone, max 500 words, no jargon..."
               value={constraints}
               onChange={(e) => setConstraints(e.target.value)}
+            />
+          </div>
+
+          <div className="wizard-optional-divider">
+            <span>Optional: for a more robust prompt</span>
+          </div>
+
+          <div className="wizard-form-group">
+            <label className="wizard-label">Explicit Role</label>
+            <input
+              className="wizard-input"
+              placeholder="e.g., A senior copywriter specialized in B2B SaaS"
+              value={explicitRole}
+              onChange={(e) => setExplicitRole(e.target.value)}
+            />
+          </div>
+
+          <div className="wizard-form-group">
+            <label className="wizard-label">Clear Audience</label>
+            <input
+              className="wizard-input"
+              placeholder="e.g., Marketing directors of startups with 10-50 employees"
+              value={audience}
+              onChange={(e) => setAudience(e.target.value)}
+            />
+          </div>
+
+          <div className="wizard-form-group">
+            <label className="wizard-label">Validation Criteria</label>
+            <textarea
+              className="wizard-textarea"
+              rows={2}
+              placeholder="e.g., The output must be actionable, under 300 words, and include a CTA."
+              value={validationCriteria}
+              onChange={(e) => setValidationCriteria(e.target.value)}
             />
           </div>
 

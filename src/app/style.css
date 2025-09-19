@@ -193,6 +193,29 @@ body {
     opacity: 0.7;
 }
 
+.wizard-optional-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: #606080;
+    font-size: 0.8rem;
+    margin: 1rem 0 0.5rem;
+}
+
+.wizard-optional-divider::before,
+.wizard-optional-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid #303050;
+}
+
+.wizard-optional-divider:not(:empty)::before {
+    margin-right: .5em;
+}
+
+.wizard-optional-divider:not(:empty)::after {
+    margin-left: .5em;
+}
 .wizard-error {
     color: #ff5555;
     font-size: 0.9rem;

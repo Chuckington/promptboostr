@@ -10,7 +10,9 @@ const OPTIONAL_FIELDS = [
   "category", "subCategory", "audience", "tone", "length", "style",
   "subject", "mood", "palette", "detailLevel", "ratio",
   "dataType", "period", "deliverableType", "recommendationsCount",
-  "complexity", "includeExample"
+  "complexity", "includeExample",
+  "explicitRole",
+  "validationCriteria"
 ] as const;
 const ALL_FIELDS = [...CORE_FIELDS, ...OPTIONAL_FIELDS];
 
