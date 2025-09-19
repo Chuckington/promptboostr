@@ -64,124 +64,127 @@ export default function WizardPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Prompt Parfait — Wizard</h1>
-      <p className="text-sm text-gray-400">
-        Remplis les 5 champs, puis génère ton prompt (Markdown + JSON export).
-      </p>
+    <main className="wizard-container">
+      {/* Left Panel: Wizard Form */}
+      <div className="wizard-panel">
+        <h1>PromptBoostr Wizard</h1>
+        <p>Fill the 5 fields to generate your perfect prompt.</p>
 
-      <form onSubmit={onSubmit} className="grid grid-cols-1 gap-4">
-        <div>
-          <label className="block text-sm font-medium">Rôle</label>
-          <input
-            className="mt-1 w-full rounded-xl border border-gray-700 bg-gray-900 p-3 outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Ex.: Expert UX, Coach Lean Six Sigma, Rédacteur technique…"
-            value={role}
-            onChange={(e) => setRole(e.target.value)}
-          />
-        </div>
+        <form onSubmit={onSubmit} className="wizard-form">
+          <div className="wizard-form-group">
+            <label className="wizard-label">Role</label>
+            <input
+              className="wizard-input"
+              placeholder="e.g., UX Expert, Tech Writer, Marketing Analyst..."
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium">Objectif</label>
-          <input
-            className="mt-1 w-full rounded-xl border border-gray-700 bg-gray-900 p-3 outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Ex.: Rédiger un plan d’implémentation, Générer un e-mail, etc."
-            value={goal}
-            onChange={(e) => setGoal(e.target.value)}
-          />
-        </div>
+          <div className="wizard-form-group">
+            <label className="wizard-label">Goal</label>
+            <input
+              className="wizard-input"
+              placeholder="e.g., Write an implementation plan, Generate an email..."
+              value={goal}
+              onChange={(e) => setGoal(e.target.value)}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium">Contexte</label>
-          <textarea
-            className="mt-1 w-full rounded-xl border border-gray-700 bg-gray-900 p-3 outline-none focus:ring-2 focus:ring-indigo-500"
-            rows={4}
-            placeholder="Infos clés: audience, contraintes business, données disponibles, outils…"
-            value={context}
-            onChange={(e) => setContext(e.target.value)}
-          />
-        </div>
+          <div className="wizard-form-group">
+            <label className="wizard-label">Context</label>
+            <textarea
+              className="wizard-textarea"
+              rows={4}
+              placeholder="Key info: audience, business constraints, available data..."
+              value={context}
+              onChange={(e) => setContext(e.target.value)}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium">Format</label>
-          <input
-            className="mt-1 w-full rounded-xl border border-gray-700 bg-gray-900 p-3 outline-none focus:ring-2 focus:ring-indigo-500"
-            placeholder="Ex.: Plan en 5 étapes, Email, JSON, Tableau, Markdown…"
-            value={format}
-            onChange={(e) => setFormat(e.target.value)}
-          />
-        </div>
+          <div className="wizard-form-group">
+            <label className="wizard-label">Format</label>
+            <input
+              className="wizard-input"
+              placeholder="e.g., 5-step plan, Email, JSON, Markdown table..."
+              value={format}
+              onChange={(e) => setFormat(e.target.value)}
+            />
+          </div>
 
-        <div>
-          <label className="block text-sm font-medium">Contraintes</label>
-          <textarea
-            className="mt-1 w-full rounded-xl border border-gray-700 bg-gray-900 p-3 outline-none focus:ring-2 focus:ring-indigo-500"
-            rows={3}
-            placeholder="Ex.: Ton pro, FR/EN, ≤ 500 mots, sources, style…"
-            value={constraints}
-            onChange={(e) => setConstraints(e.target.value)}
-          />
-        </div>
+          <div className="wizard-form-group">
+            <label className="wizard-label">Constraints</label>
+            <textarea
+              className="wizard-textarea"
+              rows={3}
+              placeholder="e.g., Professional tone, max 500 words, no jargon..."
+              value={constraints}
+              onChange={(e) => setConstraints(e.target.value)}
+            />
+          </div>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            disabled={loading}
-            className="rounded-2xl bg-indigo-600 px-4 py-2 font-semibold hover:bg-indigo-500 disabled:opacity-50"
-          >
-            {loading ? "Génération…" : "Generate"}
-          </button>
-          {error && <span className="text-sm text-red-400">{error}</span>}
-        </div>
-      </form>
+          <div className="wizard-form-actions">
+            <button type="submit" disabled={loading} className="wizard-button">
+              {loading ? "Generating..." : "Generate"}
+            </button>
+            {error && <span className="wizard-error">{error}</span>}
+          </div>
+        </form>
+      </div>
 
-      {(markdown || structured) && (
-        <section className="space-y-4">
-          {markdown && (
-            <div className="rounded-2xl border border-gray-800">
-              <div className="flex items-center justify-between border-b border-gray-800 px-4 py-2">
-                <h2 className="text-lg font-semibold">Markdown</h2>
+      {/* Right Panel: Results */}
+      <div className="result-panel">
+        {!loading && !markdown && !structured && (
+          <div className="result-placeholder">
+            <h2>Your generated prompt will appear here.</h2>
+            <p>Fill out the form and click &quot;Generate&quot;.</p>
+          </div>
+        )}
+
+        {loading && (
+          <div className="result-placeholder">
+            <h2>Generating...</h2>
+            <p>Please wait a moment.</p>
+          </div>
+        )}
+
+        {markdown && (
+          <div className="result-section">
+            <div className="result-header">
+              <h2>Markdown</h2>
+              <button onClick={() => copy(markdown)} className="copy-button">
+                Copy
+              </button>
+            </div>
+            <pre className="result-content">{markdown}</pre>
+          </div>
+        )}
+
+        {structured && (
+          <div className="result-section">
+            <div className="result-header">
+              <h2>Structured JSON</h2>
+              <div className="result-header-buttons">
                 <button
-                  onClick={() => copy(markdown)}
-                  className="rounded-lg bg-gray-800 px-3 py-1 text-sm hover:bg-gray-700"
+                  onClick={() => copy(JSON.stringify(structured, null, 2))}
+                  className="copy-button"
                 >
-                  Copier
+                  Copy JSON
                 </button>
-              </div>
-              <pre className="whitespace-pre-wrap break-words p-4 text-sm text-gray-200">
-                {markdown}
-              </pre>
-            </div>
-          )}
-
-          {structured && (
-            <div className="rounded-2xl border border-gray-800">
-              <div className="flex items-center justify-between border-b border-gray-800 px-4 py-2">
-                <h2 className="text-lg font-semibold">JSON (export machine)</h2>
-                <div className="flex gap-2">
+                {structured.final_prompt && (
                   <button
-                    onClick={() => copy(JSON.stringify(structured, null, 2))}
-                    className="rounded-lg bg-gray-800 px-3 py-1 text-sm hover:bg-gray-700"
+                    onClick={() => copy(structured.final_prompt)}
+                    className="copy-button"
                   >
-                    Copier
+                    Copy Prompt
                   </button>
-                  {structured.final_prompt && (
-                    <button
-                      onClick={() => copy(structured.final_prompt)}
-                      className="rounded-lg bg-gray-800 px-3 py-1 text-sm hover:bg-gray-700"
-                    >
-                      Copier le prompt
-                    </button>
-                  )}
-                </div>
+                )}
               </div>
-              <pre className="overflow-x-auto p-4 text-sm text-gray-200">
-                {JSON.stringify(structured, null, 2)}
-              </pre>
             </div>
-          )}
-        </section>
-      )}
+            <pre className="result-content">{JSON.stringify(structured, null, 2)}</pre>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
