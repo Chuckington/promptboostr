@@ -18,17 +18,9 @@ export function createClient(request: NextRequest) {
           return request.cookies.get(name)?.value
         },
         set(name: string, value: string, options: CookieOptions) {
-          // If the cookie is updated, update the cookies for the request and response
-          request.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
+          // The `set` method is called whenever the Supabase client needs to
+          // set a cookie. This is called when signing in, signing out, and
+          // refreshing the session.
           response.cookies.set({
             name,
             value,
@@ -36,22 +28,9 @@ export function createClient(request: NextRequest) {
           })
         },
         remove(name: string, options: CookieOptions) {
-          // If the cookie is removed, update the cookies for the request and response
-          request.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-          response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
-          })
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
+          // The `remove` method is called whenever the Supabase client needs to
+          // remove a cookie. This is called when signing out.
+          response.cookies.delete({ name, ...options })
         },
       },
     }
