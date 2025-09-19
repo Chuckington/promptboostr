@@ -37,13 +37,24 @@ export async function middleware(request: NextRequest) {
   // This will refresh the session cookie if it's expired.
   const { data: { user } } = await supabase.auth.getUser()
 
-  // If the user is not signed in and they are trying to access a protected route,
-  // redirect them to the login page.
-  if (!user && request.nextUrl.pathname !== '/login') {
+  const { pathname } = request.nextUrl
+
+  // Define paths that are public. All other paths are protected.
+  // The root path '/' is often public, add or remove paths as needed.
+  const publicPaths = ['/login', '/']
+  const isPublicPath = publicPaths.includes(pathname)
+
+  // If the user is logged in and on the login page, redirect to the main protected route.
+  if (user && pathname === '/login') {
+    return NextResponse.redirect(new URL('/wizard', request.url))
+  }
+
+  // If the path is protected and the user is not logged in, redirect to login.
+  if (!isPublicPath && !user) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Return the response object, which may have an updated session cookie.
+  // Allow the request to continue.
   return response
 }
 
