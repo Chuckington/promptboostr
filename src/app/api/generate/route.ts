@@ -1,8 +1,6 @@
 // src/app/api/generate/route.ts
 import { NextRequest } from "next/server";
-import OpenAI from "openai";
-
-const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+import { openai } from "@/lib/openai";
 
 const CORE_FIELDS = ["role", "goal", "context", "format", "constraints"] as const;
 // Based on the project plan, these are potential optional fields.
@@ -66,7 +64,7 @@ export async function POST(req: NextRequest) {
       "\n\nBuild: 1) a concise 'markdown' (sections: Summary, Instructions for the model, Constraints, Expected format, Usage tips), " +
       "2) a 'structured' object including 'final_prompt', and optionally 'few_shot_examples' and 'guidance'.";
 
-    const completion = await client.chat.completions.create({
+    const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       response_format: { type: "json_object" },
       max_tokens: 2048, // Increased tokens for potentially more complex prompts
