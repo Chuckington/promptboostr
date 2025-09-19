@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/client";
 
 type Structured = {
   final_prompt: string;
-  [key: string]: any;
+  [key: string]: unknown;
 };
 
 export default function WizardPage() { // Renamed component
