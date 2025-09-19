@@ -1,22 +1,15 @@
-// src/app/wizard/page.tsx
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { useState } from "react";
 
 type Structured = {
-  role: string;
-  goal: string;
-  context: string;
-  format: string;
-  constraints: string;
   final_prompt: string;
-  few_shot_examples?: { input: string; output: string }[];
-  guidance?: { style?: string; tone?: string; audience?: string; success_criteria?: string };
+  [key: string]: any;
 };
 
-export default function WizardPage() {
+export default function WizardPage() { // Renamed component
   const [role, setRole] = useState("");
   const [goal, setGoal] = useState("");
   const [context, setContext] = useState("");
@@ -37,8 +30,8 @@ export default function WizardPage() {
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     setLoading(true);
+    setError(null);
     setMarkdown("");
     setStructured(null);
 
@@ -55,8 +48,8 @@ export default function WizardPage() {
       });
 
       const data = await res.json();
-      if (!res.ok || !data?.ok) {
-        setError(data?.error || "Request failed.");
+      if (!res.ok) {
+        throw new Error(data.error || "An error occurred.");
       } else {
         setMarkdown(data.markdown || "");
         setStructured(data.structured || null);
