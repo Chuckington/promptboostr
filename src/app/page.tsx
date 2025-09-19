@@ -3,10 +3,10 @@ export default function Home() {
     <main className="home-container">
       <div className="home-content">
         <h1 className="home-title">🚀 PromptBoostr</h1>
-        <h2 className="home-subtitle">Bientôt disponible</h2>
+        <h2 className="home-subtitle">Coming Soon</h2>
         <p className="home-description">
-          Nous construisons un outil qui vous aide à créer les prompts les plus puissants, précis et efficaces,
-          de la manière la plus simple possible. Restez à l&apos;écoute !
+          We&apos;re building a tool that helps you create the most powerful, precise, and effective prompts,
+          in the simplest way possible. Stay tuned!
         </p>
       </div>
     </main>
