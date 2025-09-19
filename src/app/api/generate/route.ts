@@ -61,8 +61,8 @@ export async function POST(req: NextRequest) {
 
     const userContent =
       userPromptParts.join('\n') +
-      "\n\nConstruis: 1) 'markdown' concis (sections: Résumé, Instructions au modèle, Contraintes, Format attendu, Conseils d’usage), " +
-      "2) 'structured' incluant 'final_prompt', et optionnellement 'few_shot_examples' et 'guidance'.";
+      "\n\nBuild: 1) a concise 'markdown' (sections: Summary, Instructions for the model, Constraints, Expected format, Usage tips), " +
+      "2) a 'structured' object including 'final_prompt', and optionally 'few_shot_examples' and 'guidance'.";
 
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
@@ -72,20 +72,20 @@ export async function POST(req: NextRequest) {
         {
           role: "system",
           content:
-            "Tu es un expert en création de 'Prompts Parfaits' pour les modèles de langage (LLM) et les générateurs d'images. " +
-            "Ton objectif est de transformer la demande d'un utilisateur en un prompt structuré et de haute qualité. " +
-            "L'utilisateur fournira des champs. Les 5 champs de base sont : Rôle, Objectif, Contexte, Format, Contraintes. " +
-            "Il pourra aussi fournir une Catégorie ('Texte', 'Image', 'Analyse', 'Connaissance générale'), une Sous-Catégorie ('Email', 'Logo'), et d'autres champs d'affinage (audience, ton, style, longueur, etc.).\n\n" +
-            "Ta réponse DOIT être un objet JSON avec deux clés : 'markdown' (string) et 'structured' (objet).\n\n" +
-            "1. **Objet 'structured'** :\n" +
-            "   - Recopie TOUS les champs d'entrée fournis par l'utilisateur.\n" +
-            "   - `final_prompt`: Un prompt final, prêt à l'emploi, compact et actionnable. C'est la partie la plus importante. Adapte-le en fonction de la Catégorie :\n" +
-            "     - Pour 'Texte', 'Analyse', 'Connaissance générale' : crée un prompt textuel pour un LLM.\n" +
-            "     - Pour 'Image' : crée un prompt descriptif pour un modèle de génération d'images (DALL-E, Midjourney), incluant des détails visuels (sujet, style, ambiance, couleurs, composition).\n" +
-            "   - `guidance` (objet optionnel) : Infère des conseils comme `style`, `tone`, `audience`, `success_criteria`.\n" +
-            "   - `few_shot_examples` (tableau optionnel de 0-3 objets) : Si pertinent, fournis des exemples `{input, output}`.\n\n" +
-            "2. **Chaîne 'markdown'** :\n" +
-            "   - Un résumé concis et lisible du prompt, structuré avec les sections : Résumé, Instructions au modèle, Contraintes, Format attendu, Conseils d’usage."
+            "You are an expert in creating 'Perfect Prompts' for language models (LLMs) and image generators. " +
+            "Your goal is to transform a user's request into a structured, high-quality prompt. " +
+            "The user will provide fields. The 5 core fields are: Role, Goal, Context, Format, Constraints. " +
+            "They may also provide a Category ('Text', 'Image', 'Analysis', 'General Knowledge'), a Sub-Category ('Email', 'Logo'), and other refinement fields (audience, tone, style, length, etc.).\n\n" +
+            "Your response MUST be a JSON object with two keys: 'markdown' (string) and 'structured' (object).\n\n" +
+            "1. **'structured' object**:\n" +
+            "   - Copy ALL input fields provided by the user.\n" +
+            "   - `final_prompt`: A final, ready-to-use, compact, and actionable prompt. This is the most important part. Adapt it based on the Category:\n" +
+            "     - For 'Text', 'Analysis', 'General Knowledge': create a text-based prompt for an LLM.\n" +
+            "     - For 'Image': create a descriptive prompt for an image generation model (DALL-E, Midjourney), including visual details (subject, style, mood, colors, composition).\n" +
+            "   - `guidance` (optional object): Infer advice like `style`, `tone`, `audience`, `success_criteria`.\n" +
+            "   - `few_shot_examples` (optional array of 0-3 objects): If relevant, provide `{input, output}` examples.\n\n" +
+            "2. **'markdown' string**:\n" +
+            "   - A concise and readable summary of the prompt, structured with the sections: Summary, Instructions for the model, Constraints, Expected format, Usage tips."
         },
         {
           role: "user",
