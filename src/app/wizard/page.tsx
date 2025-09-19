@@ -294,6 +294,20 @@ export default function WizardPage() { // Renamed component
           </div>
         )}
       </div>
+
+      {/* Styles to prevent result boxes from overflowing the screen */}
+      <style jsx>{`
+        .result-panel {
+          min-width: 0; /* Prevents horizontal overflow for flex children */
+          overflow-y: auto; /* Allows this panel to scroll if content is too tall */
+        }
+        .result-section {
+          min-height: 0; /* Helps contain the scrolling area within flexbox */
+        }
+        .result-content {
+          overflow: auto; /* Adds scrollbars to the code blocks when needed */
+        }
+      `}</style>
     </main>
   );
 }
