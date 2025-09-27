@@ -285,6 +285,9 @@ export default function TreeWizardPage() {
           display: flex;
           gap: 0.75rem; /* Adds space between input and button */
         }
+        .chat-input-form .wizard-input {
+          flex-grow: 1; /* Makes the input field expand */
+        }
         .chat-area {
           display: flex;
           flex-direction: column;
