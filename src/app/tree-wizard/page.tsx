@@ -115,26 +115,31 @@ export default function TreeWizardPage() {
           />
           <button type="submit" className="wizard-button" disabled={loading}>Send</button>
         </form>
+
+        <div className="wizard-form-actions" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
+          <button
+            onClick={handleGeneratePrompt}
+            className="wizard-button"
+            disabled={userMessageCount < 10 || isGenerating}
+          >
+            {isGenerating ? "Generating..." : "Generate Prompt"}
+          </button>
+          <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#888', marginTop: '0.5rem' }}>
+            Answer at least 10 questions to enable generation. ({userMessageCount} / 10)
+          </p>
+        </div>
       </div>
 
       {/* Right Panel: Results */}
       <div className="result-panel">
         <div className="result-section">
           <h2>Collected Information</h2>
-          <p>Answer at least 10 questions to enable generation. ({userMessageCount} / 10)</p>
           <pre className="result-content" style={{ maxHeight: '300px' }}>
             {JSON.stringify(extractedData, null, 2)}
           </pre>
-          <button
-            onClick={handleGeneratePrompt}
-            className="wizard-button"
-            disabled={userMessageCount < 10 || isGenerating}
-            style={{ marginTop: '1rem' }}
-          >
-            {isGenerating ? "Generating..." : "Generate Prompt"}
-          </button>
           {error && <p className="wizard-error">{error}</p>}
         </div>
+
         {generatedMarkdown && (
           <div className="result-section">
             <h2>Generated Markdown</h2>
