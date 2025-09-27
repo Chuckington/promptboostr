@@ -275,6 +275,10 @@ export default function TreeWizardPage() {
       </div>
 
       <style jsx>{`
+        .chat-input-form {
+          display: flex;
+          gap: 0.75rem; /* Adds space between input and button */
+        }
         .chat-area {
           display: flex;
           flex-direction: column;
