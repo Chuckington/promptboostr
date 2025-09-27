@@ -1,6 +1,6 @@
 // src/app/api/generate/route.ts
 import { NextRequest } from "next/server";
-import type { ChatCompletionContentPart } from "openai/resources/chat.completions.mjs";
+import type { ChatCompletionContentPart } from "openai/resources/chat/completions";
 import { openai } from "@/lib/openai";
 
 const CORE_FIELDS = ["role", "goal", "context", "format", "constraints"] as const;
