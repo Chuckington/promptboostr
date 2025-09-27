@@ -1,141 +1,150 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useState, useEffect, useRef } from "react";
 
-// We define the types based on our Supabase table
-type QuestionOption = {
-  label: string;
-  value: string;
-  next_question_id?: string | null; // The next question can be tied to the option
-};
-
-type Question = {
-  id: string;
-  text: string;
-  type: 'single-choice' | 'text-input';
-  field_to_set: string;
-  options: QuestionOption[] | null;
-  next_question_id: string | null;
+type Message = {
+  role: "user" | "assistant";
+  content: string;
 };
 
 export default function TreeWizardPage() {
-  const supabase = createClient();
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [textInputValue, setTextInputValue] = useState("");
-  const [loading, setLoading] = useState(true);
+  // --- State Management ---
+  const [conversation, setConversation] = useState<Message[]>([]);
+  const [extractedData, setExtractedData] = useState<Record<string, string>>({});
+  const [userInput, setUserInput] = useState("");
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to fetch a question by its ID
-  const fetchQuestion = async (id: string) => {
+  // --- Final Prompt Generation State ---
+  const [generatedMarkdown, setGeneratedMarkdown] = useState("");
+  const [generatedStructured, setGeneratedStructured] = useState<object | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Scroll to the bottom of the chat on new messages
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [conversation]);
+
+  // Start the conversation with a welcome message
+  useEffect(() => {
+    setConversation([{ role: "assistant", content: "Hello! What are you trying to create today?" }]);
+  }, []);
+
+  const handleSendMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!userInput.trim() || loading) return;
+
+    const newUserMessage: Message = { role: "user", content: userInput };
+    const newConversation = [...conversation, newUserMessage];
+    setConversation(newConversation);
+    setUserInput("");
     setLoading(true);
     setError(null);
-    const { data, error } = await supabase
-      .from("questions")
-      .select("*")
-      .eq("id", id)
-      .single();
 
-    if (error) {
-      setError("Could not fetch question. " + error.message);
-    } else {
-      setCurrentQuestion(data);
-    }
-    setLoading(false);
-  };
+    try {
+      const res = await fetch("/api/tree-wizard", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: newConversation, extractedData }),
+      });
+      const data = await res.json();
 
-  // On component mount, fetch the starting question.
-  useEffect(() => {
-    const fetchStartNode = async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("questions")
-        .select("*")
-        .eq("is_start_node", true)
-        .single();
+      if (!res.ok) throw new Error(data.error || "Failed to get a response.");
 
-      if (error) {
-        setError("Could not find a starting question. " + error.message);
-      } else {
-        setCurrentQuestion(data);
-      }
+      // Add the assistant's new question to the conversation
+      setConversation(prev => [...prev, { role: "assistant", content: data.next_question }]);
+      // Merge newly extracted data with existing data
+      setExtractedData(prev => ({ ...prev, ...data.extracted_data }));
+
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred.");
+    } finally {
       setLoading(false);
-    };
-
-    fetchStartNode();
-  }, [supabase]);
-
-  const handleAnswer = (value: string, nextQuestionId?: string | null) => {
-    if (!currentQuestion) return;
-
-    // Store the answer
-    const newAnswers = { ...answers, [currentQuestion.field_to_set]: value };
-    setAnswers(newAnswers);
-    setTextInputValue(""); // Reset text input after submission
-
-    // Determine the next question ID.
-    // For single-choice, it comes from the option. For text-input, from the question.
-    const nextId = nextQuestionId || currentQuestion.next_question_id;
-
-    if (nextId) {
-      fetchQuestion(nextId);
-    } else {
-      // This is the end of the wizard path
-      setCurrentQuestion(null);
-      console.log("Wizard finished! Final answers:", newAnswers);
-      // Here you would trigger the API call to generate the final prompt
     }
   };
 
-  const renderQuestion = () => {
-    if (!currentQuestion) return null;
-
-    switch (currentQuestion.type) {
-      case 'single-choice':
-        return currentQuestion.options?.map((option) => (
-          <button key={option.value} onClick={() => handleAnswer(option.value, option.next_question_id)} className="wizard-button">
-            {option.label}
-          </button>
-        ));
-      case 'text-input':
-        return (
-          <form onSubmit={(e) => { e.preventDefault(); handleAnswer(textInputValue); }} className="wizard-form">
-            <input
-              type="text"
-              value={textInputValue}
-              onChange={(e) => setTextInputValue(e.target.value)}
-              className="wizard-input"
-              placeholder="Type your answer here..."
-              autoFocus
-            />
-            <button type="submit" className="wizard-button">Next</button>
-          </form>
-        );
-      default:
-        return <p>Unknown question type.</p>;
+  const handleGeneratePrompt = async () => {
+    setIsGenerating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(extractedData),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to generate prompt.");
+      setGeneratedMarkdown(data.markdown);
+      setGeneratedStructured(data.structured);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An unknown error occurred.");
+    } finally {
+      setIsGenerating(false);
     }
   };
+
+  const userMessageCount = conversation.filter(m => m.role === 'user').length;
 
   return (
-    <main className="home-container">
-      <div className="home-content">
-        <h1>Question-Based Prompt Builder</h1>
+    <main className="wizard-container">
+      {/* Left Panel: Conversational Wizard */}
+      <div className="wizard-panel">
+        <div className="wizard-header">
+          <h1>Conversational Wizard</h1>
+          <p>Answer the questions to build your prompt.</p>
+        </div>
+        <div className="chat-area">
+          {conversation.map((msg, index) => (
+            <div key={index} className={`chat-message ${msg.role}`}>
+              <p>{msg.content}</p>
+            </div>
+          ))}
+          {loading && <div className="chat-message assistant"><p>Thinking...</p></div>}
+          <div ref={chatEndRef} />
+        </div>
+        <form onSubmit={handleSendMessage} className="chat-input-form">
+          <input
+            type="text"
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            className="wizard-input"
+            placeholder="Type your answer..."
+            disabled={loading}
+          />
+          <button type="submit" className="wizard-button" disabled={loading}>Send</button>
+        </form>
+      </div>
 
-        {loading && <p>Loading question...</p>}
-        {error && <p style={{ color: 'red' }}>{error}</p>}
-
-        {currentQuestion && (
-          <div>
-            <h2 style={{ marginBottom: '1.5rem' }}>{currentQuestion.text}</h2>
-            <div className="wizard-form-actions" style={{ flexDirection: 'column' }}>{renderQuestion()}</div>
+      {/* Right Panel: Results */}
+      <div className="result-panel">
+        <div className="result-section">
+          <h2>Collected Information</h2>
+          <p>Answer at least 10 questions to enable generation. ({userMessageCount} / 10)</p>
+          <pre className="result-content" style={{ maxHeight: '300px' }}>
+            {JSON.stringify(extractedData, null, 2)}
+          </pre>
+          <button
+            onClick={handleGeneratePrompt}
+            className="wizard-button"
+            disabled={userMessageCount < 10 || isGenerating}
+            style={{ marginTop: '1rem' }}
+          >
+            {isGenerating ? "Generating..." : "Generate Prompt"}
+          </button>
+          {error && <p className="wizard-error">{error}</p>}
+        </div>
+        {generatedMarkdown && (
+          <div className="result-section">
+            <h2>Generated Markdown</h2>
+            <pre className="result-content">{generatedMarkdown}</pre>
           </div>
         )}
-
-        {!loading && !currentQuestion && Object.keys(answers).length > 0 && (
-          <div>
-            <h2>Wizard Complete!</h2>
-            <pre>{JSON.stringify(answers, null, 2)}</pre>
+        {generatedStructured && (
+          <div className="result-section">
+            <h2>Generated JSON</h2>
+            <pre className="result-content">{JSON.stringify(generatedStructured, null, 2)}</pre>
           </div>
         )}
       </div>
