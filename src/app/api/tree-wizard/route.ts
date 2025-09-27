@@ -16,11 +16,12 @@ The 5 core fields we MUST collect are: 'role', 'goal', 'context', 'format', 'con
 The user has already provided the following information: ${JSON.stringify(extractedData)}.
 
 Based on the conversation history and the provided data:
-1.  Check if all 5 core fields are present in the extracted data.
-2.  If any core fields are missing, your NEXT question MUST be to ask for one of the missing core fields. Prioritize them in order. For example, if 'role' is missing, ask for the role.
-3.  If all 5 core fields are collected, ask a logical follow-up question to get more clarifying details (like style, tone, audience, subject, etc.).
-4.  Analyze the user's last message to extract any new key information.
-5.  Your response MUST be a JSON object with two keys: "next_question" (string) and "extracted_data" (an object with any newly extracted key-value pairs).
+1.  Analyze the user's last message to extract any new key information.
+2.  If this is the user's first response (conversation history has 2 messages), your next question MUST introduce the 5 core questions and then ask for the 'role'. For example: "Great, a poster! To build the best prompt, let's start with 5 core questions. First, what role should the AI take on for this task? (e.g., a graphic designer...)"
+3.  After the first response, check if all 5 core fields are present in the extracted data.
+4.  If any core fields are missing, your NEXT question MUST be to ask for one of the missing core fields. Prioritize them in order.
+5.  If all 5 core fields are collected, ask a logical follow-up question to get more clarifying details (like style, tone, audience, subject, etc.).
+6.  Your response MUST be a JSON object with two keys: "next_question" (string) and "extracted_data" (an object with any newly extracted key-value pairs).
 
 Example for a missing core field: If 'goal' is missing, you might return: {"next_question": "What is the main goal of this prompt?", "extracted_data": {}}.
 

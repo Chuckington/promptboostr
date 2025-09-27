@@ -44,7 +44,7 @@ export default function TreeWizardPage() {
   // Start the conversation with a welcome message once authenticated
   useEffect(() => {
     if (isAuthenticated && conversation.length === 0) {
-    setConversation([{ role: "assistant", content: "Hello! To build the perfect prompt, I'll start by asking you 5 core questions. First, what role should the AI take on for this task? (e.g., a marketing expert, a software developer...)" }]);
+    setConversation([{ role: "assistant", content: "Hello! What are we creating today?" }]);
     }
   }, [isAuthenticated, conversation.length]);
 
