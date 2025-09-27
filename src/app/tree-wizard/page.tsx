@@ -8,6 +8,11 @@ type Message = {
 };
 
 export default function TreeWizardPage() {
+  // --- Authentication State ---
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [authError, setAuthError] = useState("");
+
   // --- State Management ---
   const [conversation, setConversation] = useState<Message[]>([]);
   const [extractedData, setExtractedData] = useState<Record<string, string>>({});
@@ -29,10 +34,33 @@ export default function TreeWizardPage() {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversation]);
 
-  // Start the conversation with a welcome message
   useEffect(() => {
-    setConversation([{ role: "assistant", content: "Hello! What are you trying to create today?" }]);
+    // On page load, check if the user is already authenticated in this session
+    if (sessionStorage.getItem("is_authenticated") === "true") {
+      setIsAuthenticated(true);
+    }
   }, []);
+
+  // Start the conversation with a welcome message once authenticated
+  useEffect(() => {
+    if (isAuthenticated && conversation.length === 0) {
+    setConversation([{ role: "assistant", content: "Hello! What are you trying to create today?" }]);
+    }
+  }, [isAuthenticated, conversation.length]);
+
+  function handlePasswordSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    // The password MUST be stored in an environment variable for security
+    if (passwordInput === process.env.NEXT_PUBLIC_WIZARD_PASSWORD) {
+      setIsAuthenticated(true);
+      // Store the authentication status in session storage
+      sessionStorage.setItem("is_authenticated", "true");
+      setAuthError("");
+    } else {
+      setAuthError("Incorrect password.");
+      setPasswordInput("");
+    }
+  }
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -109,6 +137,36 @@ export default function TreeWizardPage() {
 
   const userMessageCount = conversation.filter(m => m.role === 'user').length;
 
+  // If not authenticated, show a password form
+  if (!isAuthenticated) {
+    return (
+      <main className="wizard-container" style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ textAlign: 'center' }}>
+          <h1>Access Conversational Wizard</h1>
+          <p>Please enter the password to continue.</p>
+          <form
+            onSubmit={handlePasswordSubmit}
+            style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '1.5rem', minWidth: '300px' }}
+          >
+            <input
+              type="password"
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              className="wizard-input"
+              placeholder="Password"
+              autoFocus
+            />
+            <button type="submit" className="wizard-button">
+              Enter
+            </button>
+            {authError && <p className="wizard-error" style={{ marginTop: '0.5rem' }}>{authError}</p>}
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  // If authenticated, show the wizard
   return (
     <main className="wizard-container">
       {/* Left Panel: Conversational Wizard */}
