@@ -255,10 +255,16 @@ export default function WizardPage() { // Renamed component
 
           <div className="wizard-form-group">
             <label className="wizard-label">Context Document (Image, etc.)</label>
+            {/* We hide the default file input and use a styled label instead */}
+            <label htmlFor="file-upload" className="wizard-file-upload-label">
+              {file ? file.name : "Click to upload a file..."}
+            </label>
             <input
+              id="file-upload"
               type="file"
               onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
-              className="wizard-file-input" />
+              style={{ display: 'none' }}
+            />
           </div>
 
           <div className="wizard-form-actions">
@@ -341,6 +347,22 @@ export default function WizardPage() { // Renamed component
         }
         .result-content {
           overflow: auto; /* Adds scrollbars to the code blocks when needed */
+        }
+        .wizard-file-upload-label {
+          display: block;
+          padding: 10px 15px;
+          background-color: #2c2c2c;
+          border: 1px solid #444;
+          border-radius: 8px;
+          cursor: pointer;
+          color: #9e9e9e; /* Placeholder text color */
+          font-size: 1rem;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .wizard-file-upload-label:hover {
+          border-color: #666;
         }
       `}</style>
     </main>
