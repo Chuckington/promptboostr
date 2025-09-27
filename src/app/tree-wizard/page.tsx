@@ -233,6 +233,9 @@ export default function TreeWizardPage() {
           align-items: center;
           justify-content: center;
         }
+        .chat-message p {
+          margin: 0;
+        }
         .chat-message.assistant {
           background-color: #333;
           align-self: flex-start;
