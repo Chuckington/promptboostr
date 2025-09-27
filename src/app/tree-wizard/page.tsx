@@ -158,6 +158,32 @@ export default function TreeWizardPage() {
           </div>
         )}
       </div>
+
+      <style jsx>{`
+        .chat-area {
+          display: flex;
+          flex-direction: column;
+          gap: 1rem;
+          padding: 1rem 0;
+        }
+        .chat-message {
+          padding: 0.75rem 1.25rem;
+          border-radius: 18px;
+          max-width: 80%;
+          line-height: 1.4;
+        }
+        .chat-message.assistant {
+          background-color: #333;
+          align-self: flex-start;
+          border-bottom-left-radius: 4px;
+        }
+        .chat-message.user {
+          background-color: #007aff;
+          color: white;
+          align-self: flex-end;
+          border-bottom-right-radius: 4px;
+        }
+      `}</style>
     </main>
   );
 }
