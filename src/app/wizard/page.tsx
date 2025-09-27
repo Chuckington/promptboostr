@@ -42,6 +42,10 @@ export default function WizardPage() { // Renamed component
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // --- File Upload State ---
+  const [file, setFile] = useState<File | null>(null);
+  const [copyNotification, setCopyNotification] = useState("");
+
   const [markdown, setMarkdown] = useState<string>("");
   const [structured, setStructured] = useState<Structured | null>(null);
 
@@ -73,12 +77,21 @@ export default function WizardPage() { // Renamed component
     setMarkdown("");
     setStructured(null);
 
-    const body = Object.fromEntries(Object.entries(formState).filter(([, value]) => value));
+    const formData = new FormData();
+    const formFields = Object.fromEntries(Object.entries(formState).filter(([, value]) => value));
+
+    // Append form fields as a single JSON string
+    formData.append("fields", JSON.stringify(formFields));
+
+    if (file) {
+      formData.append("file", file);
+    }
+
     try {
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        // The browser will set the 'Content-Type' to 'multipart/form-data'
+        body: formData,
       });
 
       const data = await res.json();
@@ -100,7 +113,11 @@ export default function WizardPage() { // Renamed component
   }
 
   function copy(text: string) {
-    navigator.clipboard.writeText(text).catch(() => {});
+    navigator.clipboard.writeText(text).then(() => {
+      setCopyNotification("Copied to clipboard!");
+      // Hide the notification after 2 seconds
+      setTimeout(() => setCopyNotification(""), 2000);
+    }).catch(() => {});
   }
 
   // If not authenticated, show a password form
@@ -232,6 +249,18 @@ export default function WizardPage() { // Renamed component
             />
           </div>
 
+          <div className="wizard-optional-divider">
+            <span>Optional: Add a document for context</span>
+          </div>
+
+          <div className="wizard-form-group">
+            <label className="wizard-label">Context Document (Image, etc.)</label>
+            <input
+              type="file"
+              onChange={(e) => setFile(e.target.files ? e.target.files[0] : null)}
+              className="wizard-file-input" />
+          </div>
+
           <div className="wizard-form-actions">
             <button type="submit" disabled={loading} className="wizard-button">
               {loading ? "Generating..." : "Generate"}
@@ -243,6 +272,12 @@ export default function WizardPage() { // Renamed component
 
       {/* Right Panel: Results */}
       <div className="result-panel">
+        {copyNotification && (
+          <div className="copy-notification">
+            {copyNotification}
+          </div>
+        )}
+
         {!loading && !markdown && !structured && (
           <div className="result-placeholder">
             <h2>Your generated prompt will appear here.</h2>

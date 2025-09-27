@@ -44,11 +44,21 @@ function validate(body: unknown): { ok: boolean; data?: GenerateInput; error?: s
 
 export async function POST(req: NextRequest) {
   try {
-    const json = await req.json().catch(() => ({}));
-    const v = validate(json);
+    const formData = await req.formData();
+    const fieldsValue = formData.get("fields");
+    const file = formData.get("file") as File | null;
+
+    if (!fieldsValue || typeof fieldsValue !== 'string') {
+      return new Response(JSON.stringify({ ok: false, error: "Missing 'fields' in form data." }), { status: 400 });
+    }
+
+    const fields = JSON.parse(fieldsValue);
+    const v = validate(fields);
     if (!v.ok) return new Response(JSON.stringify({ ok: false, error: v.error }), { status: 400 });
 
     const data = v.data!;
+
+    const userMessages: (string | { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } })[] = [];
 
     // Dynamically build the user prompt content from all provided fields
     const userPromptParts = Object.entries(data).map(([key, value]) => {
@@ -59,10 +69,28 @@ export async function POST(req: NextRequest) {
       return `${formattedKey}: ${value}`;
     });
 
-    const userContent =
+    const textContent =
       userPromptParts.join('\n') +
       "\n\nBuild: 1) a concise 'markdown' (sections: Summary, Instructions for the model, Constraints, Expected format, Usage tips), " +
       "2) a 'structured' object including 'final_prompt', and optionally 'few_shot_examples' and 'guidance'.";
+
+    userMessages.push({ type: "text", text: textContent });
+
+    // If a file is present, process it as an image
+    if (file) {
+      // Check if the file is an image
+      if (file.type.startsWith("image/")) {
+        const buffer = await file.arrayBuffer();
+        const base64Image = Buffer.from(buffer).toString("base64");
+        const imageUrl = `data:${file.type};base64,${base64Image}`;
+        userMessages.push({
+          type: "image_url",
+          image_url: { url: imageUrl },
+        });
+      } else {
+        // For now, we only handle images. We can add other file types later.
+      }
+    }
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
@@ -89,7 +117,7 @@ export async function POST(req: NextRequest) {
         },
         {
           role: "user",
-          content: userContent
+          content: userMessages
         }
       ]
     });
