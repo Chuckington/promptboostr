@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 type QuestionOption = {
   label: string;
   value: string;
+  next_question_id?: string | null; // The next question can be tied to the option
 };
 
 type Question = {
@@ -44,7 +45,7 @@ export default function TreeWizardPage() {
     setLoading(false);
   };
 
-  // On component mount, fetch the starting question
+  // On component mount, fetch the starting question.
   useEffect(() => {
     const fetchStartNode = async () => {
       setLoading(true);
@@ -65,22 +66,54 @@ export default function TreeWizardPage() {
     fetchStartNode();
   }, [supabase]);
 
-  const handleAnswer = (value: string) => {
+  const handleAnswer = (value: string, nextQuestionId?: string | null) => {
     if (!currentQuestion) return;
 
     // Store the answer
     const newAnswers = { ...answers, [currentQuestion.field_to_set]: value };
     setAnswers(newAnswers);
+    setTextInputValue(""); // Reset text input after submission
 
-    // Logic to find the next question (this is a simplified example)
-    // For 'single-choice', you might have a mapping. For 'text-input', it's direct.
-    if (currentQuestion.next_question_id) {
-      fetchQuestion(currentQuestion.next_question_id);
+    // Determine the next question ID.
+    // For single-choice, it comes from the option. For text-input, from the question.
+    const nextId = nextQuestionId || currentQuestion.next_question_id;
+
+    if (nextId) {
+      fetchQuestion(nextId);
     } else {
       // This is the end of the wizard path
       setCurrentQuestion(null);
       console.log("Wizard finished! Final answers:", newAnswers);
       // Here you would trigger the API call to generate the final prompt
+    }
+  };
+
+  const renderQuestion = () => {
+    if (!currentQuestion) return null;
+
+    switch (currentQuestion.type) {
+      case 'single-choice':
+        return currentQuestion.options?.map((option) => (
+          <button key={option.value} onClick={() => handleAnswer(option.value, option.next_question_id)} className="wizard-button">
+            {option.label}
+          </button>
+        ));
+      case 'text-input':
+        return (
+          <form onSubmit={(e) => { e.preventDefault(); handleAnswer(textInputValue); }} className="wizard-form">
+            <input
+              type="text"
+              value={textInputValue}
+              onChange={(e) => setTextInputValue(e.target.value)}
+              className="wizard-input"
+              placeholder="Type your answer here..."
+              autoFocus
+            />
+            <button type="submit" className="wizard-button">Next</button>
+          </form>
+        );
+      default:
+        return <p>Unknown question type.</p>;
     }
   };
 
@@ -94,8 +127,8 @@ export default function TreeWizardPage() {
 
         {currentQuestion && (
           <div>
-            <h2>{currentQuestion.text}</h2>
-            {/* Render logic for different question types will go here */}
+            <h2 style={{ marginBottom: '1.5rem' }}>{currentQuestion.text}</h2>
+            <div className="wizard-form-actions" style={{ flexDirection: 'column' }}>{renderQuestion()}</div>
           </div>
         )}
 
