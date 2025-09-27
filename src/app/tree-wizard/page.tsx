@@ -69,10 +69,13 @@ export default function TreeWizardPage() {
     setIsGenerating(true);
     setError(null);
     try {
+      const formData = new FormData();
+      formData.append("fields", JSON.stringify(extractedData));
+
       const res = await fetch("/api/generate", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(extractedData),
+        // The browser will set the 'Content-Type' to 'multipart/form-data'
+        body: formData,
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to generate prompt.");
