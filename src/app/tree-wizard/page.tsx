@@ -11,6 +11,7 @@ export default function TreeWizardPage() {
   // --- State Management ---
   const [conversation, setConversation] = useState<Message[]>([]);
   const [extractedData, setExtractedData] = useState<Record<string, string>>({});
+  const [showJson, setShowJson] = useState(false); // To toggle between text and JSON view
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +89,15 @@ export default function TreeWizardPage() {
     }
   };
 
+  const formatExtractedDataAsText = () => {
+    return Object.entries(extractedData)
+      .map(([key, value]) => {
+        const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase());
+        return `${formattedKey}: ${value}`;
+      })
+      .join('\n');
+  };
+
   const userMessageCount = conversation.filter(m => m.role === 'user').length;
 
   return (
@@ -95,8 +105,10 @@ export default function TreeWizardPage() {
       {/* Left Panel: Conversational Wizard */}
       <div className="wizard-panel">
         <div className="wizard-header">
-          <h1>Conversational Wizard</h1>
-          <p>Answer the questions to build your prompt.</p>
+          <div>
+            <h1>Conversational Wizard</h1>
+            <p>Answer the questions to build your prompt.</p>
+          </div>
         </div>
         <div className="chat-area">
           {conversation.map((msg, index) => (
@@ -138,9 +150,17 @@ export default function TreeWizardPage() {
       {/* Right Panel: Results */}
       <div className="result-panel">
         <div className="result-section">
-          <h2 style={{ textAlign: 'center' }}>Collected Information</h2>
+          <div className="result-header">
+            <h2 style={{ textAlign: 'center', flexGrow: 1 }}>Collected Information</h2>
+            <button onClick={() => setShowJson(!showJson)} className="copy-button" style={{ fontSize: '0.8rem' }}>
+              {showJson ? 'Show Text' : 'Show JSON'}
+            </button>
+          </div>
           <pre className="result-content" style={{ maxHeight: '300px' }}>
-            {JSON.stringify(extractedData, null, 2)}
+            {showJson
+              ? JSON.stringify(extractedData, null, 2)
+              : formatExtractedDataAsText()
+            }
           </pre>
           {error && <p className="wizard-error">{error}</p>}
         </div>
@@ -171,6 +191,7 @@ export default function TreeWizardPage() {
           border-radius: 18px;
           max-width: 80%;
           line-height: 1.4;
+          text-align: center;
         }
         .chat-message.assistant {
           background-color: #333;
