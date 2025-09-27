@@ -14,6 +14,7 @@ export default function TreeWizardPage() {
   const [showJson, setShowJson] = useState(false); // To toggle between text and JSON view
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [copyNotification, setCopyNotification] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   // --- Final Prompt Generation State ---
@@ -98,6 +99,14 @@ export default function TreeWizardPage() {
       .join('\n');
   };
 
+  function copy(text: string) {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopyNotification("Copied to clipboard!");
+      // Hide the notification after 2 seconds
+      setTimeout(() => setCopyNotification(""), 2000);
+    }).catch(() => {});
+  }
+
   const userMessageCount = conversation.filter(m => m.role === 'user').length;
 
   return (
@@ -135,14 +144,14 @@ export default function TreeWizardPage() {
           <button
             onClick={handleGeneratePrompt}
             className="wizard-button"
-            disabled={userMessageCount < 10 || isGenerating}
+            disabled={userMessageCount < 8 || isGenerating}
           >
             {isGenerating ? "Generating..." : "Generate Prompt"}
           </button>
           <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#888', marginTop: '0.5rem', lineHeight: '1.2' }}>
-            Answer at least 10 questions to enable generation.
+            Answer at least 8 questions to enable generation.
             <br />
-            ({userMessageCount} / 10)
+            ({userMessageCount} / 8)
           </p>
         </div>
       </div>
@@ -150,6 +159,11 @@ export default function TreeWizardPage() {
       {/* Right Panel: Results */}
       <div className="result-panel">
         <div className="result-section">
+          {copyNotification && (
+            <div className="copy-notification">
+              {copyNotification}
+            </div>
+          )}
           <div className="result-header">
             <h2 style={{ textAlign: 'center', flexGrow: 1 }}>Collected Information</h2>
             <button onClick={() => setShowJson(!showJson)} className="copy-button" style={{ fontSize: '0.8rem' }}>
@@ -167,13 +181,36 @@ export default function TreeWizardPage() {
 
         {generatedMarkdown && (
           <div className="result-section">
-            <h2>Generated Markdown</h2>
+            <div className="result-header">
+              <h2>Markdown</h2>
+              <button onClick={() => copy(generatedMarkdown)} className="copy-button">
+                Copy
+              </button>
+            </div>
             <pre className="result-content">{generatedMarkdown}</pre>
           </div>
         )}
         {generatedStructured && (
           <div className="result-section">
-            <h2>Generated JSON</h2>
+            <div className="result-header">
+              <h2>Structured JSON</h2>
+              <div className="result-header-buttons">
+                <button
+                  onClick={() => copy(JSON.stringify(generatedStructured, null, 2))}
+                  className="copy-button"
+                >
+                  Copy JSON
+                </button>
+                {(generatedStructured as { final_prompt?: string }).final_prompt && (
+                  <button
+                    onClick={() => copy((generatedStructured as { final_prompt: string }).final_prompt)}
+                    className="copy-button"
+                  >
+                    Copy Prompt
+                  </button>
+                )}
+              </div>
+            </div>
             <pre className="result-content">{JSON.stringify(generatedStructured, null, 2)}</pre>
           </div>
         )}
@@ -192,6 +229,9 @@ export default function TreeWizardPage() {
           max-width: 80%;
           line-height: 1.4;
           text-align: center;
+          display: flex;
+          align-items: center;
+          justify-content: center;
         }
         .chat-message.assistant {
           background-color: #333;
