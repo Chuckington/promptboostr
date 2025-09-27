@@ -124,8 +124,10 @@ export default function TreeWizardPage() {
           >
             {isGenerating ? "Generating..." : "Generate Prompt"}
           </button>
-          <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#888', marginTop: '0.5rem' }}>
-            Answer at least 10 questions to enable generation. ({userMessageCount} / 10)
+          <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#888', marginTop: '0.5rem', lineHeight: '1.2' }}>
+            Answer at least 10 questions to enable generation.
+            <br />
+            ({userMessageCount} / 10)
           </p>
         </div>
       </div>
@@ -133,7 +135,7 @@ export default function TreeWizardPage() {
       {/* Right Panel: Results */}
       <div className="result-panel">
         <div className="result-section">
-          <h2>Collected Information</h2>
+          <h2 style={{ textAlign: 'center' }}>Collected Information</h2>
           <pre className="result-content" style={{ maxHeight: '300px' }}>
             {JSON.stringify(extractedData, null, 2)}
           </pre>
