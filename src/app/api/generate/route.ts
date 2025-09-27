@@ -1,5 +1,6 @@
 // src/app/api/generate/route.ts
 import { NextRequest } from "next/server";
+import type { ChatCompletionContentPart } from "openai/resources/chat.completions.mjs";
 import { openai } from "@/lib/openai";
 
 const CORE_FIELDS = ["role", "goal", "context", "format", "constraints"] as const;
@@ -58,7 +59,7 @@ export async function POST(req: NextRequest) {
 
     const data = v.data!;
 
-    const userMessages: (string | { type: "text"; text: string } | { type: "image_url"; image_url: { url: string } })[] = [];
+    const userMessages: ChatCompletionContentPart[] = [];
 
     // Dynamically build the user prompt content from all provided fields
     const userPromptParts = Object.entries(data).map(([key, value]) => {
