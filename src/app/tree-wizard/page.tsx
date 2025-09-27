@@ -206,7 +206,13 @@ export default function TreeWizardPage() {
           >
             {isGenerating ? "Generating..." : "Generate Prompt"}
           </button>
-          <p style={{ textAlign: 'center', fontSize: '0.8rem', color: '#888', marginTop: '0.5rem', lineHeight: '1.2' }}>
+          <p style={{ 
+            textAlign: 'center', 
+            fontSize: '0.8rem', 
+            color: '#888', 
+            marginTop: '0.75rem', /* Added space */
+            lineHeight: '1.2' 
+          }}>
             Answer at least 8 questions to enable generation.
             <br />
             ({userMessageCount} / 8)
@@ -284,6 +290,8 @@ export default function TreeWizardPage() {
           flex-direction: column;
           gap: 1rem;
           padding: 1rem 0;
+          flex-grow: 1; /* Makes the chat area expand */
+          overflow-y: auto; /* Makes the chat area scrollable */
         }
         .chat-message {
           padding: 0.75rem 1.25rem;
