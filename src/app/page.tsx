@@ -19,6 +19,19 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      <style jsx>{`
+        .home-actions {
+          display: flex;
+          gap: 1rem; /* Adds space between the buttons */
+          margin-top: 2.5rem; /* Adds more space above the buttons */
+        }
+        /* The .wizard-button class is on a Link, which renders an <a> tag.
+           We target it directly to remove the underline. */
+        .home-actions :global(.wizard-button) {
+          text-decoration: none;
+        }
+      `}</style>
     </main>
   );
 }
