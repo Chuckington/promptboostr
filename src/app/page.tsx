@@ -13,10 +13,10 @@ export default function Home() {
           in the simplest way possible. Stay tuned!
         </p>
         <div className="home-actions">
-          <Link href="/wizard" className="wizard-button">
+          <Link href="/wizard" className="wizard-button" target="_blank" rel="noopener noreferrer">
             Simple Wizard (DEV)
           </Link>
-          <Link href="/tree-wizard" className="wizard-button">
+          <Link href="/tree-wizard" className="wizard-button" target="_blank" rel="noopener noreferrer">
             Conversational Wizard (DEV)
           </Link>
         </div>
@@ -25,6 +25,7 @@ export default function Home() {
       <style jsx>{`
         .home-actions {
           display: flex;
+          justify-content: center; /* Centers the buttons */
           gap: 1rem; /* Adds space between the buttons */
           margin-top: 2.5rem; /* Adds more space above the buttons */
         }
