@@ -322,6 +322,7 @@ export default function TreeWizardPage() {
         }
         .wizard-container {
           height: 100vh; /* Make the main container fill the screen height */
+          overflow: hidden; /* Prevent the main container itself from scrolling */
         }
         .wizard-panel {
           overflow-y: hidden; /* Prevent this panel itself from scrolling */
