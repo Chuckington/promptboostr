@@ -107,6 +107,7 @@ body {
     gap: 100px;
     min-height: 100vh;
     align-items: stretch; /* Make panels equal height */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
 }
 
 .wizard-panel,
