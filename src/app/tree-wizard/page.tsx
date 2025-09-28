@@ -320,20 +320,6 @@ export default function TreeWizardPage() {
           align-self: flex-end;
           border-bottom-right-radius: 4px;
         }
-        .wizard-container {
-          height: 100vh; /* Make the main container fill the screen height */
-          overflow: hidden; /* Prevent the main container itself from scrolling */
-        }
-        .wizard-panel {
-          overflow-y: hidden; /* Prevent this panel itself from scrolling */
-          display: flex; /* Make it a flex container */
-          flex-direction: column; /* Stack children vertically */
-          min-height: 0; /* Necessary for flexbox scrolling */
-        }
-        .result-panel {
-          overflow-y: auto; /* Make the right panel scrollable */
-          min-height: 0; /* Necessary for flexbox scrolling */
-        }
       `}</style>
     </main>
   );

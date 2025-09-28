@@ -265,6 +265,25 @@ body {
     font-size: 0.9rem;
 }
 
+/* --- Global Layout Fix for Non-Scrolling Interface --- */
+.wizard-container {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.wizard-panel, .result-panel {
+  min-height: 0; /* Crucial for flexbox scrolling */
+}
+
+.wizard-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.result-panel {
+  overflow-y: auto;
+}
+
 /* Right Panel: Results */
 .result-panel .result-placeholder {
     display: flex;

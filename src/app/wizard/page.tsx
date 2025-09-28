@@ -338,10 +338,7 @@ export default function WizardPage() { // Renamed component
 
       {/* Styles to prevent result boxes from overflowing the screen */}
       <style jsx>{`
-        .result-panel {
-          min-width: 0; /* Prevents horizontal overflow for flex children */
-          overflow-y: auto; /* Allows this panel to scroll if content is too tall */
-        }
+        /* Most layout styles are now global. We only need specific overrides here. */
         .result-section {
           min-height: 0; /* Helps contain the scrolling area within flexbox */
         }
@@ -363,6 +360,9 @@ export default function WizardPage() { // Renamed component
         }
         .wizard-file-upload-label:hover {
           border-color: #666;
+        }
+        .wizard-form {
+          overflow-y: auto; /* Make the form itself scrollable */
         }
       `}</style>
     </main>
