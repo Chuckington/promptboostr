@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="home-container">
@@ -8,6 +10,14 @@ export default function Home() {
           We&apos;re building a tool that helps you create the most powerful, precise, and effective prompts,
           in the simplest way possible. Stay tuned!
         </p>
+        <div className="home-actions">
+          <Link href="/wizard" className="wizard-button">
+            Simple Wizard (DEV)
+          </Link>
+          <Link href="/tree-wizard" className="wizard-button">
+            Conversational Wizard (DEV)
+          </Link>
+        </div>
       </div>
     </main>
   );
