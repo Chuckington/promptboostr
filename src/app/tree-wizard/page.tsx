@@ -323,6 +323,9 @@ export default function TreeWizardPage() {
         .wizard-container {
           height: 100vh; /* Make the main container fill the screen height */
         }
+        .wizard-panel {
+          min-height: 0; /* Necessary for flexbox scrolling */
+        }
         .result-panel {
           overflow-y: auto; /* Make the right panel scrollable */
           min-height: 0; /* Necessary for flexbox scrolling */
