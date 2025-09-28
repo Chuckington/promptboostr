@@ -326,6 +326,8 @@ export default function TreeWizardPage() {
         }
         .wizard-panel {
           overflow-y: hidden; /* Prevent this panel itself from scrolling */
+          display: flex; /* Make it a flex container */
+          flex-direction: column; /* Stack children vertically */
           min-height: 0; /* Necessary for flexbox scrolling */
         }
         .result-panel {
