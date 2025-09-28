@@ -22,6 +22,7 @@ body {
     justify-content: center;
     text-align: center;
     padding: 1rem;
+    box-sizing: border-box; /* Include padding in the element's total height */
 }
 
 .home-content {
