@@ -38,8 +38,9 @@ function validate(body: unknown): { ok: boolean; data?: GenerateInput; error?: s
     }
   }
 
-  const missing = CORE_FIELDS.filter((f) => !data[f]);
-  if (missing.length) return { ok: false, error: `Missing core fields: ${missing.join(", ")}` };
+  // Validation for core fields is removed as per user request.
+  // The generation will proceed even if some core fields are missing.
+  
   return { ok: true, data: data as GenerateInput };
 }
 
