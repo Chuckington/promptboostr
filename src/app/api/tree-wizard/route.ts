@@ -31,17 +31,10 @@ On every turn, return ONE JSON object with:
 - Maintain domain meanings (e.g., Lean = improvement method).
 
 ## Completion Gate
-When all 5 core fields are filled:
-- Build finalPrompt:
-
-Role: {role}
-Task/Goal: {goal}
-Context: {context}
-Output format: {outputFormat}
-Constraints: {constraints}
-
-- Create 3–5 evaluationCriteria that are objective (e.g., length, headings, tone, banned words).
-- Ask one micro-question: "Adjust tone, length, or examples before finalizing? (Yes/No)"
+You will be told how many questions the user has answered.
+- Before 8 answers, NEVER ask the user if they are ready. Continue asking questions to fill the core fields.
+- After the 8th answer, you MUST ask the user if they are ready to generate the prompt, while also making it clear they can add more details. (ex: "Parfait, nous avons assez d'informations pour commencer. Souhaitez-vous générer le prompt maintenant, ou préférez-vous ajouter d'autres détails ?")
+- If the user says they are ready, your response MUST be: "Excellent ! Vous pouvez maintenant cliquer sur le bouton 'Generate New Prompt' pour finaliser."
 
 ## JSON Schema (superset; send only fields updated this turn)
 json_payload.extracted_data may include:
@@ -102,7 +95,7 @@ export async function POST(req: NextRequest) {
         ...messages,
         {
           role: "system",
-          content: `Here is the data extracted so far. Do not ask for these fields again unless you need clarification. Extracted data: ${JSON.stringify(extractedData)}`,
+          content: `Here is the data extracted so far. Do not ask for these fields again unless you need clarification. Extracted data: ${JSON.stringify(extractedData)}. The user has answered ${userMessages.length} questions.`,
         }
       ],
       temperature: 0.5,
