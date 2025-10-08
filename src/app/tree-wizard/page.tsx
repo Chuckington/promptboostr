@@ -118,6 +118,16 @@ export default function TreeWizardPage() {
     }
   };
 
+  const handleResetAndStartOver = () => {
+    // Reset the entire state to its initial values
+    setConversation([{ role: "assistant", content: "Hello! What are we creating today?" }]);
+    setExtractedData({});
+    setGeneratedMarkdown("");
+    setGeneratedStructured(null);
+    setError(null);
+    setUserInput("");
+  };
+
   const formatExtractedDataAsText = () => {
     return Object.entries(extractedData)
       .map(([key, value]) => {
@@ -200,11 +210,11 @@ export default function TreeWizardPage() {
 
         <div className="wizard-form-actions" style={{ marginTop: 'auto', paddingTop: '1rem' }}>
           <button
-            onClick={handleGeneratePrompt}
+            onClick={generatedMarkdown ? handleResetAndStartOver : handleGeneratePrompt}
             className="wizard-button"
-            disabled={userMessageCount < 8 || isGenerating}
+            disabled={!generatedMarkdown && (userMessageCount < 8 || isGenerating)}
           >
-            {isGenerating ? "Generating..." : "Generate Prompt"}
+            {isGenerating ? "Generating..." : (generatedMarkdown ? "Generate New Prompt" : "Generate Prompt")}
           </button>
           <p style={{ 
             textAlign: 'center', 
