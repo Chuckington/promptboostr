@@ -8,7 +8,7 @@ const CORE_FIELDS = ["role", "goal", "context", "format", "constraints"] as cons
 const OPTIONAL_FIELDS = [
   "category", "subCategory", "audience", "tone", "length", "style",
   "subject", "mood", "palette", "detailLevel", "ratio",
-  "dataType", "period", "deliverableType", "recommendationsCount",
+  "targetApplication", "dataType", "period", "deliverableType", "recommendationsCount",
   "complexity", "includeExample",
   "explicitRole",
   "validationCriteria"
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest) {
             "Your goal is to transform a user's request into a structured, high-quality prompt. " +
             "The user will provide fields. The 5 core fields are: Role, Goal, Context, Format, Constraints. " +
             "They may also provide a Category ('Text', 'Image', 'Analysis', 'General Knowledge'), a Sub-Category ('Email', 'Logo'), and other refinement fields (audience, tone, style, length, etc.).\n\n" +
-            "Your response MUST be a JSON object with two keys: 'markdown' (string) and 'structured' (object).\n\n" +
+          "If a 'Target Application' (e.g., Sora, ChatGPT, Midjourney, Claude) is provided, you MUST tailor the 'final_prompt' specifically for that application's syntax and best practices. Your response MUST be a JSON object with two keys: 'markdown' (string) and 'structured' (object).\n\n" +
             "1. **'structured' object**:\n" +
             "   - Copy ALL input fields provided by the user.\n" +
             "   - `final_prompt`: A final, ready-to-use, compact, and actionable prompt. This is the most important part. Adapt it based on the Category:\n" +

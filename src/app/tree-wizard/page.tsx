@@ -16,7 +16,7 @@ export default function TreeWizardPage() {
   // --- State Management ---
   const [conversation, setConversation] = useState<Message[]>([]);
   const [extractedData, setExtractedData] = useState<Record<string, string>>({});
-  const [showJson, setShowJson] = useState(false); // To toggle between text and JSON view
+  const [activeTab, setActiveTab] = useState<'markdown' | 'json' | 'info'>('info');
   const [userInput, setUserInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [copyNotification, setCopyNotification] = useState("");
@@ -111,6 +111,7 @@ export default function TreeWizardPage() {
       if (!res.ok) throw new Error(data.error || "Failed to generate prompt.");
       setGeneratedMarkdown(data.markdown);
       setGeneratedStructured(data.structured);
+      setActiveTab('markdown'); // Switch to markdown tab by default on generation
     } catch (err) {
       setError(err instanceof Error ? err.message : "An unknown error occurred.");
     } finally {
@@ -232,62 +233,68 @@ export default function TreeWizardPage() {
 
       {/* Right Panel: Results */}
       <div className="result-panel">
-        <div className="result-section">
-          {copyNotification && (
-            <div className="copy-notification">
-              {copyNotification}
-            </div>
-          )}
+        {copyNotification && <div className="copy-notification">{copyNotification}</div>}
+
+        {/* Tab Navigation */}
+        {generatedMarkdown ? (
+          <div className="tab-nav">
+            <button className={`tab-button ${activeTab === 'markdown' ? 'active' : ''}`} onClick={() => setActiveTab('markdown')}>Markdown</button>
+            <button className={`tab-button ${activeTab === 'json' ? 'active' : ''}`} onClick={() => setActiveTab('json')}>JSON</button>
+            <button className={`tab-button ${activeTab === 'info' ? 'active' : ''}`} onClick={() => setActiveTab('info')}>Collected Info</button>
+          </div>
+        ) : (
           <div className="result-header">
             <h2 style={{ textAlign: 'center', flexGrow: 1 }}>Collected Information</h2>
-            <button onClick={() => setShowJson(!showJson)} className="copy-button" style={{ fontSize: '0.8rem' }}>
-              {showJson ? 'Show Text' : 'Show JSON'}
-            </button>
           </div>
-          <pre className="result-content" style={{ maxHeight: '300px' }}>
-            {showJson
-              ? JSON.stringify(extractedData, null, 2)
-              : formatExtractedDataAsText()
-            }
-          </pre>
-          {error && <p className="wizard-error">{error}</p>}
-        </div>
+        )}
 
-        {generatedMarkdown && (
-          <div className="result-section">
-            <div className="result-header">
-              <h2>Markdown</h2>
-              <button onClick={() => copy(generatedMarkdown)} className="copy-button">
-                Copy
-              </button>
-            </div>
-            <pre className="result-content">{generatedMarkdown}</pre>
-          </div>
-        )}
-        {generatedStructured && (
-          <div className="result-section">
-            <div className="result-header">
-              <h2>Structured JSON</h2>
-              <div className="result-header-buttons">
-                <button
-                  onClick={() => copy(JSON.stringify(generatedStructured, null, 2))}
-                  className="copy-button"
-                >
-                  Copy JSON
-                </button>
-                {(generatedStructured as { final_prompt?: string }).final_prompt && (
-                  <button
-                    onClick={() => copy((generatedStructured as { final_prompt: string }).final_prompt)}
-                    className="copy-button"
-                  >
-                    Copy Prompt
-                  </button>
-                )}
+        {/* Tab Content */}
+        <div className="tab-content-area">
+          {activeTab === 'markdown' && generatedMarkdown && (
+            <div className="result-section">
+              <div className="result-header">
+                <h2>Markdown</h2>
+                <button onClick={() => copy(generatedMarkdown)} className="copy-button">Copy</button>
               </div>
+              <pre className="result-content">{generatedMarkdown}</pre>
             </div>
-            <pre className="result-content">{JSON.stringify(generatedStructured, null, 2)}</pre>
-          </div>
-        )}
+          )}
+
+          {activeTab === 'json' && generatedStructured && (
+            <div className="result-section">
+              <div className="result-header">
+                <h2>Structured JSON</h2>
+                <div className="result-header-buttons">
+                  <button onClick={() => copy(JSON.stringify(generatedStructured, null, 2))} className="copy-button">Copy JSON</button>
+                  {(generatedStructured as { final_prompt?: string }).final_prompt && (
+                    <button onClick={() => copy((generatedStructured as { final_prompt: string }).final_prompt)} className="copy-button">Copy Prompt</button>
+                  )}
+                </div>
+              </div>
+              <pre className="result-content">{JSON.stringify(generatedStructured, null, 2)}</pre>
+            </div>
+          )}
+
+          {activeTab === 'info' && (
+            <div className="result-section">
+              <div className="result-header">
+                <h2>Collected Information</h2>
+                <button onClick={() => copy(formatExtractedDataAsText())} className="copy-button">Copy Text</button>
+              </div>
+              <pre className="result-content">{formatExtractedDataAsText()}</pre>
+            </div>
+          )}
+
+          {/* Placeholder for when no prompt is generated yet */}
+          {!generatedMarkdown && (
+            <div className="result-section">
+              <pre className="result-content" style={{ maxHeight: '300px' }}>
+                {formatExtractedDataAsText()}
+              </pre>
+              {error && <p className="wizard-error">{error}</p>}
+            </div>
+          )}
+        </div>
       </div>
 
       <style jsx>{`
@@ -329,6 +336,32 @@ export default function TreeWizardPage() {
           color: white;
           align-self: flex-end;
           border-bottom-right-radius: 4px;
+        }
+        .tab-nav {
+          display: flex;
+          gap: 0.5rem;
+          border-bottom: 1px solid #303050;
+          padding-bottom: 1rem;
+          margin-bottom: -1rem; /* Pull content up */
+        }
+        .tab-button {
+          padding: 0.5rem 1rem;
+          border: 1px solid transparent;
+          background: none;
+          color: #a0a0c0;
+          cursor: pointer;
+          border-radius: 8px;
+          font-size: 0.9rem;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+        .tab-button:hover {
+          background: #303050;
+        }
+        .tab-button.active {
+          color: #ffffff;
+          background: #4a4a6a;
+          border-color: #6c5ce7;
         }
       `}</style>
     </main>
