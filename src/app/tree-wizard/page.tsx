@@ -249,7 +249,7 @@ export default function TreeWizardPage() {
         )}
 
         {/* Tab Content */}
-        <div className="tab-content-area">
+        <div className="tab-content-area" style={{ display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
           {activeTab === 'markdown' && generatedMarkdown && (
             <div className="result-section">
               <div className="result-header">
@@ -275,7 +275,7 @@ export default function TreeWizardPage() {
             </div>
           )}
 
-          {activeTab === 'info' && (
+          {activeTab === 'info' && generatedMarkdown && (
             <div className="result-section">
               <div className="result-header">
                 <h2>Collected Information</h2>
@@ -285,12 +285,10 @@ export default function TreeWizardPage() {
             </div>
           )}
 
-          {/* Placeholder for when no prompt is generated yet */}
+          {/* Display Collected Info before generation */}
           {!generatedMarkdown && (
             <div className="result-section">
-              <pre className="result-content" style={{ maxHeight: '300px' }}>
-                {formatExtractedDataAsText()}
-              </pre>
+              <pre className="result-content">{formatExtractedDataAsText()}</pre>
               {error && <p className="wizard-error">{error}</p>}
             </div>
           )}
@@ -336,6 +334,10 @@ export default function TreeWizardPage() {
           color: white;
           align-self: flex-end;
           border-bottom-right-radius: 4px;
+        }
+        .result-section {
+          flex-grow: 1; /* Make section fill available space */
+          display: flex; /* Allow content to grow */
         }
         .tab-nav {
           display: flex;
