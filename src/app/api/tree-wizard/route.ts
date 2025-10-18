@@ -78,10 +78,6 @@ export async function POST(req: NextRequest) {
           role: "system",
           content: SYSTEM_PROMPT,
         },
-        {
-          role: "system",
-          content: `Here is the data extracted so far. Do not ask for these fields again unless you need clarification. Extracted data: ${JSON.stringify(extractedData)}. The user has provided ${messages.filter(m => m.role === 'user').length} answers.`,
-        },
         ...messages,
       ],
       temperature: 0.5,
