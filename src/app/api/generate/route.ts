@@ -110,12 +110,13 @@ export async function POST(req: NextRequest) {
             "1. **'structured' object**:\n" +
             "   - Copy ALL input fields provided by the user.\n" +
             "   - `final_prompt`: A final, ready-to-use, compact, and actionable prompt. This is the most important part. Adapt it based on the Category:\n" +
+            "   - `final_prompt`: A final, ready-to-use, and comprehensive prompt that incorporates ALL the details provided. This is the most important part. Adapt it based on the Category:\n" +
             "     - For 'Text', 'Analysis', 'General Knowledge': create a text-based prompt for an LLM.\n" +
             "     - For 'Image': create a descriptive prompt for an image generation model (DALL-E, Midjourney), including visual details (subject, style, mood, colors, composition).\n" +
             "   - `guidance` (optional object): Infer advice like `style`, `tone`, `audience`, `success_criteria`.\n" +
             "   - `few_shot_examples` (optional array of 0-3 objects): If relevant, provide `{input, output}` examples.\n\n" +
             "2. **'markdown' string**:\n" +
-            "   - A concise and readable summary of the prompt, structured with the sections: Summary, Instructions for the model, Constraints, Expected format, Usage tips."
+            "   - A readable narrative of the prompt, written as a single, well-structured paragraph. Faithfully include all key details, instructions, and constraints from the user's input. Do not omit any information; your goal is to represent the user's full intent clearly. Do not use markdown headers (like '# Summary')."
         },
         {
           role: "user",

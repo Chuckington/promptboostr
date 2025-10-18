@@ -16,13 +16,13 @@ On every turn, return ONE JSON object with:
   }
 
 ## Process
-1) You receive conversation history + current extracted_data.
-2) Fill the 5 core fields in this order: role, goal, context, outputFormat, constraints.
+1) You receive the conversation history and the current 'extracted_data' object.
+2) Your primary goal is to fill the 5 core fields (role, goal, context, outputFormat, constraints). Review the 'extracted_data' object and ask questions ONLY for fields that are still empty.
 3) Ask EXACTLY one question per turn. Keep it <= 140 chars.
-4) ALWAYS include 2–3 strong examples after your question, inside parentheses like this: (ex: example 1, example 2).
+4) ALWAYS include 2–3 relevant examples after your question, inside parentheses like this: (ex: example 1, example 2). The examples should guide, not replace, the user's context.
 5) Auto-infer any info from the user’s messages and write it to extracted_data.
 6) Mirror the user’s language.
-
+7) If the user wants to add more details, ask a specific, open-ended question about what to add (e.g., "Quelles autres sections ou informations clés aimerais-tu inclure ?").
 ## Heuristics
 - First message with a deliverable => deduce goal immediately; don't re-ask unless meaningless.
 - If answer is vague: propose 3 options + "Other".
@@ -41,48 +41,33 @@ On every turn, return ONE JSON object with:
 - Legal Domain Guidance: If the user's role or goal is legal (e.g., "lawyer", "draft a legal brief"), ask for key legal parameters like \`jurisdiction\`, \`area of law\`, and \`specific legal issue\`. As a constraint, gently remind the user not to share sensitive or confidential client information.
 
 
-## Completion Gate
-You will be told how many questions the user has answered.
-- Before 8 answers, NEVER ask the user if they are ready. Continue asking questions to fill the core fields. If the core fields are already filled, ask for optional fields.
-- After the 8th answer, you MUST ask the user if they are ready to generate the prompt, while also making it clear they can add more details. (ex: "Parfait, nous avons assez d'informations pour commencer. Souhaitez-vous générer le prompt maintenant, ou préférez-vous ajouter d'autres détails ?")
-- If the user says they are ready, your response MUST be: "Excellent ! Vous pouvez maintenant cliquer sur le bouton 'Generate Prompt' pour finaliser."
+## Questioning Strategy & Deepening
+Your goal is to be insatiable. Never stop asking questions.
+- First, ensure the 5 core fields are filled.
+- Once the core fields are filled, move on to optional refinement fields (audience, tone, style, etc.).
+- After gathering the basics, start asking "deepening" questions to elaborate on the user's answers. (e.g., "You mentioned a 'professional tone'. Can you describe what 'professional' means in this context? Is it more academic, corporate, or something else?").
+- NEVER ask the user if they are ready to generate. The user will decide when to stop. Your role is to continuously dig for more detail.
+- Avoid phrases like "on y est presque" or "on a une bonne base". Instead, use encouraging phrases to dig deeper, like "C'est un excellent début. Pour aller plus loin, pourriez-vous préciser... ?" or "Intéressant. Creusons cet aspect : ...".
 
 ## JSON Schema (superset; send only fields updated this turn)
 json_payload.extracted_data may include:
 role, goal, context, outputFormat, constraints,
 audience, tone, style, readingLevel, brandVoice,
-targetApplication, examplesGood[], examplesBad[],
-evaluationCriteria[], references[], language,
-safetyNotes, metadata{assumed,versionName}, finalPrompt
-
-## Templates
-- role → "Quel rôle veux-tu que l’IA joue ? (ex: Consultant Lean Six Sigma, Copywriter e-commerce, Développeur Python senior)"
-
-- goal → "Quel livrable exact veux-tu ? (ex: Email B2B de 150 mots, Plan d’article SEO, Prompt Midjourney pour un logo)"
-
-- context → "Quel est le contexte essentiel ? (ex: Cible: restaurateurs à Montréal, Données: ventes Q3, Sujet: Empire romain)"
-
-- outputFormat → "Quel format de sortie veux-tu ? (ex: Tableau Markdown, JSON, Plan en 7 sections)"
-
-- constraints → "Des contraintes à respecter ? (ex: Ton pro-chaleureux et 200 mots, Style direct et max 6 bullets, Éviter le mot 'personnalisation')"
+targetApplication, examplesGood[], examplesBad[], evaluationCriteria[], references[], language,
+safetyNotes, metadata{assumed,versionName}
 `;
+
+interface WizardRequestBody {
+  messages: { role: 'user' | 'assistant'; content: string }[];
+  extractedData: Record<string, any>;
+}
 
 export async function POST(req: NextRequest) {
   try {
-    const { messages, extractedData } = await req.json();
+    const { messages, extractedData }: WizardRequestBody = await req.json();
 
     if (!messages || !Array.isArray(messages) || !extractedData) {
       return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
-    }
-
-    // If this is the first user message, treat it as the goal.
-    const userMessages = messages.filter(m => m.role === 'user');
-    if (userMessages.length === 1 && !extractedData.goal) {
-      const firstAnswer = userMessages[0].content;
-      // A simple heuristic to check if the answer is meaningful
-      if (firstAnswer.trim().length > 5 && !/^(hi|hello|idk|i don't know)$/i.test(firstAnswer.trim())) {
-        extractedData.goal = firstAnswer;
-      }
     }
 
     const completion = await openai.chat.completions.create({
@@ -93,11 +78,11 @@ export async function POST(req: NextRequest) {
           role: "system",
           content: SYSTEM_PROMPT,
         },
-        ...messages,
         {
           role: "system",
-          content: `Here is the data extracted so far. Do not ask for these fields again unless you need clarification. Extracted data: ${JSON.stringify(extractedData)}. The user has answered ${userMessages.length} questions.`,
-        }
+          content: `Here is the data extracted so far. Do not ask for these fields again unless you need clarification. Extracted data: ${JSON.stringify(extractedData)}. The user has provided ${messages.filter(m => m.role === 'user').length} answers.`,
+        },
+        ...messages,
       ],
       temperature: 0.5,
     });
@@ -118,30 +103,33 @@ export async function POST(req: NextRequest) {
       ) {
         throw new Error("Malformed JSON from model");
       }
-      // Adapt the response to the format expected by the frontend
+      // The frontend expects { next_question: string, extracted_data: object }
+      // We adapt the model's response to fit this structure.
       return NextResponse.json({
-        next_question: parsedResponse.chat_markdown, // Send the rich markdown to the user
-        extracted_data: parsedResponse.json_payload.extracted_data,
+        next_question: parsedResponse.chat_markdown, // The user-facing message
+        extracted_data: parsedResponse.json_payload.extracted_data, // The updated data
       });
     } catch (e) {
       console.error("Failed to parse JSON from model:", rawResponse);
-      // Fallback: if JSON is broken, ask a generic question
       return NextResponse.json({
-        next_question: "Could you please clarify that? I had trouble understanding.",
-        extracted_data: {}
-      });
+        error: "Failed to parse response from model.",
+        details: rawResponse
+      }, { status: 502 });
     }
 
   } catch (err: unknown) {
     console.error(err);
-    const error = err as Error;
-    return NextResponse.json({ error: error.message || "An unexpected error occurred." }, { status: 500 });
+    let errorMessage = "An unexpected error occurred.";
+    if (err instanceof Error) {
+      errorMessage = err.message;
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
 
 export async function GET() {
   return NextResponse.json({
     ok: true,
-    hint: "This is the conversational wizard API. POST with { messages, extractedData }."
+    hint: "This is the conversational wizard API. POST with { messages, extractedData }.",
   });
 }
