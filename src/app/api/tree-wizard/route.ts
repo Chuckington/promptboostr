@@ -45,7 +45,7 @@ On every turn, return ONE JSON object with:
 You will be told how many questions the user has answered.
 - Before 8 answers, NEVER ask the user if they are ready. Continue asking questions to fill the core fields. If the core fields are already filled, ask for optional fields.
 - After the 8th answer, you MUST ask the user if they are ready to generate the prompt, while also making it clear they can add more details. (ex: "Parfait, nous avons assez d'informations pour commencer. Souhaitez-vous générer le prompt maintenant, ou préférez-vous ajouter d'autres détails ?")
-- If the user says they are ready, your response MUST be: "Excellent ! Vous pouvez maintenant cliquer sur le bouton 'Generate New Prompt' pour finaliser."
+- If the user says they are ready, your response MUST be: "Excellent ! Vous pouvez maintenant cliquer sur le bouton 'Generate Prompt' pour finaliser."
 
 ## JSON Schema (superset; send only fields updated this turn)
 json_payload.extracted_data may include:
