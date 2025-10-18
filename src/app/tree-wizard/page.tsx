@@ -235,6 +235,13 @@ export default function TreeWizardPage() {
       <div className="result-panel">
         {copyNotification && <div className="copy-notification">{copyNotification}</div>}
 
+        {generatedMarkdown && (
+          <div className="generation-success-message">
+            <p>
+              There you go! Your prompt is ready to be used in your favorite AI application.
+            </p>
+          </div>
+        )}
         {/* Tab Navigation */}
         {generatedMarkdown ? (
           <div className="tab-nav">
@@ -364,6 +371,16 @@ export default function TreeWizardPage() {
           color: #ffffff;
           background: #4a4a6a;
           border-color: #6c5ce7;
+        }
+        .generation-success-message {
+          background-color: rgba(108, 92, 231, 0.1);
+          border: 1px solid #6c5ce7;
+          border-radius: 8px;
+          padding: 0.75rem 1.25rem;
+          text-align: center;
+          margin-bottom: 1.5rem;
+          font-weight: 500;
+          color: #e0e0e0;
         }
       `}</style>
     </main>
