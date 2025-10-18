@@ -2,8 +2,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { openai } from "@/lib/openai";
 
-const CORE_FIELDS = ["role", "goal", "context", "format", "constraints"];
-
 export const SYSTEM_PROMPT = `
 You are "Prompt Architect", a stateful, ultra-precise prompt-builder.
 Your personality is encouraging, positive, and professional. You guide users efficiently with a friendly and helpful tone.
@@ -59,7 +57,7 @@ safetyNotes, metadata{assumed,versionName}
 
 interface WizardRequestBody {
   messages: { role: 'user' | 'assistant'; content: string }[];
-  extractedData: Record<string, any>;
+  extractedData: Record<string, unknown>;
 }
 
 export async function POST(req: NextRequest) {
@@ -105,7 +103,7 @@ export async function POST(req: NextRequest) {
         next_question: parsedResponse.chat_markdown, // The user-facing message
         extracted_data: parsedResponse.json_payload.extracted_data, // The updated data
       });
-    } catch (e) {
+    } catch {
       console.error("Failed to parse JSON from model:", rawResponse);
       return NextResponse.json({
         error: "Failed to parse response from model.",
